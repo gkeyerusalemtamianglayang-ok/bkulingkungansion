@@ -579,11 +579,11 @@ async function loadAndRender(month, year){
         <td class="right">${masuk? masuk.toLocaleString() : ""}</td>
         <td class="right">${keluar? keluar.toLocaleString() : ""}</td>
         <td class="right">${saldo.toLocaleString()}</td>
-        <td>
-          <button class="no-print" ...>Edit</button>
-               <button class="no-print btn-danger" ...>Hapus</button>
-        </td>
-      </tr>`;
+        <td class="no-print">
+  <button class="no-print btn-edit" onclick="editTransaksi('${t.id}')">Edit</button>
+  <button class="no-print btn-danger" onclick="hapusTransaksi('${t.id}')">Hapus</button>
+</td>
+     </tr>;
     });
 
     // footer totals
