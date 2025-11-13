@@ -122,45 +122,61 @@ th { background:#eef6ff; font-weight:600; }
  <div class="card">
   <h3>Laporan Bulanan</h3>
 
-  <div class="laporan-filter" style="flex-direction:column;">
-<div class="filter-item">
-  <label>Pilih Bulan</label>
-  <select id="bulan"></select>
-</div>
+<div class="laporan-filter" style="flex-direction:column;">
 
-    <div class="filter-item">
-      <label>Dari Bulan</label>
-      <select id="dariBulan"></select>
-    </div>
-
-    <div class="filter-item">
-      <label>Sampai Bulan</label>
-      <select id="sampaiBulan"></select>
-    </div>
-
-    <div class="filter-item">
-      <label>Tanggal Laporan (untuk cetak)</label>
-      <input type="date" id="tanggalLaporan">
-    </div>
-
-    <div class="filter-item filter-btn">
-      <button id="lihatRentang">Laporan Rentang Bulan</button>
-    </div>
-
-    <div class="filter-item filter-btn">
-      <button id="lihat">Tampilkan Laporan Bulanan</button>
-    </div>
-
-    <div class="filter-item filter-btn">
-      <button id="downloadPDF" class="btn-print-green">Download PDF</button>
-    </div>
-
+  <!-- ====== TANGGAL LAPORAN PALING ATAS ====== -->
+  <h4>🔷 Tanggal Laporan</h4>
+  <div class="filter-item">
+    <label>Tanggal Laporan (untuk cetak)</label>
+    <input type="date" id="tanggalLaporan">
   </div>
 
-  <div id="loadingLaporan" class="small"><b>Memuat laporan...</b></div>
-  <div id="laporan" style="margin-top:24px;"></div>
+
+  <!-- ====== BAGIAN 1: LAPORAN PER BULAN ====== -->
+  <h4 style="margin-top:15px;">🔷 Laporan Bulanan</h4>
+
+  <div class="filter-item">
+    <label>Pilih Bulan</label>
+    <select id="bulan"></select>
+  </div>
+
+  <div class="filter-item">
+    <label>Pilih Tahun</label>
+    <select id="tahun"></select>
+  </div>
+
+  <div class="filter-item filter-btn">
+    <button id="lihat">Tampilkan Laporan Bulanan</button>
+  </div>
+
+
+  <!-- ====== BAGIAN 2: LAPORAN RENTANG BULAN ====== -->
+  <h4 style="margin-top:20px;">🔷 Laporan Rentang Bulan</h4>
+
+  <div class="filter-item">
+    <label>Dari Bulan</label>
+    <select id="dariBulan"></select>
+  </div>
+
+  <div class="filter-item">
+    <label>Sampai Bulan</label>
+    <select id="sampaiBulan"></select>
+  </div>
+
+  <div class="filter-item filter-btn">
+    <button id="lihatRentang">Laporan Rentang Bulan</button>
+  </div>
+
+
+  <!-- ====== DOWNLOAD PDF ====== -->
+  <div class="filter-item filter-btn" style="margin-top:20px;">
+    <button id="downloadPDF" class="btn-print-green">Download PDF</button>
+  </div>
 
 </div>
+
+<div id="loadingLaporan" class="small"><b>Memuat laporan...</b></div>
+<div id="laporan" style="margin-top:24px;"></div>
 
 <!-- MODAL EDIT -->
 <div id="modalEditBackdrop" class="modal-backdrop">
