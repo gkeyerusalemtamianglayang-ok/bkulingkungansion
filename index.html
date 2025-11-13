@@ -169,6 +169,11 @@ th { background:#eef6ff; font-weight:600; }
   cursor:pointer;
   margin-top: 4px;
 }
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
 
 .btn-submit:hover {
   background:#095fb7;
@@ -540,7 +545,9 @@ async function loadAndRender(month, year){
         <td class="right">${keluar? keluar.toLocaleString() : ""}</td>
         <td class="right">${saldo.toLocaleString()}</td>
         <td>
+          <button class="no-print" ...>Edit</button>
           <button onclick="editTransaksi('${t.id}')" style="padding:6px;border-radius:6px;margin-right:6px;">Edit</button>
+          <button class="no-print btn-danger" ...>Hapus</button>
           <button onclick="hapusTransaksi('${t.id}')" class="btn-danger">Hapus</button>
         </td>
       </tr>`;
