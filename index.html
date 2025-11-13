@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aplikasi Kas Gereja</title>
+<title>Aplikasi Kas Umum Jemaat GKE Yerusalem Tamiang Layang</title>
 
 <style>
   body {
@@ -147,8 +147,11 @@
 <body>
 
 <header>
-  Aplikasi Buku Kas Gereja
+  <img id="headerImage" src="" style="max-width:160px; margin-bottom:10px;">
+  <div style="font-size:22px; font-weight:600;">Aplikasi Buku Kas Gereja</div>
+  <div id="headerSubyek" style="font-size:16px; margin-top:4px; opacity:0.9;"></div>
 </header>
+
 
 <div class="container">
 
@@ -290,7 +293,15 @@ async function loadConfig(){
   let cfg={}; raw.forEach(r=> cfg[r.key]=r.value);
   return cfg;
 }
+async function applyHeaderConfig(){
+  const cfg = await loadConfig();
 
+  // Set gambar header
+  document.getElementById("headerImage").src = cfg.header_url;
+
+  // Set nama subyek
+  document.getElementById("headerSubyek").innerText = cfg.subyek;
+}
 
 /* ======================= LOAD & RENDER LAPORAN ======================= */
 async function loadAndRender(month){
@@ -516,6 +527,8 @@ function initMonthDropdown(){
   }
 }
 initMonthDropdown();
+applyHeaderConfig();
+
 
 document.getElementById("lihat").addEventListener("click", async()=>{
   const m = Number(document.getElementById("bulan").value);
