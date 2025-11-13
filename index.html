@@ -720,13 +720,8 @@ async function hapusTransaksi(id){
   }catch(err){ alert('Error hapus: '+err); }
 }
 
-/* ========== dropdowns & events ========== */
-function initMonthDropdown(){
-  const sel = document.getElementById('bulan'); sel.innerHTML = '';
-  for(let i=1;i<=12;i++){ const o=document.createElement('option'); o.value=i; o.textContent=monthName(i); sel.appendChild(o); }
-  sel.value = new Date().getMonth()+1;
-}
-  function initRentangDropdown(){
+/* ========== RENTANG DROPDOWN ONLY (karena bulan/tahun tunggal sudah DIHAPUS) ========== */
+function initRentangDropdown(){
   const db = document.getElementById('dariBulan');
   const sb = document.getElementById('sampaiBulan');
   if(!db || !sb) return;
@@ -747,13 +742,7 @@ function initMonthDropdown(){
   sb.value = new Date().getMonth()+1;
 }
 
-function initYearDropdown(){
-  const sel = document.getElementById('tahun'); sel.innerHTML = '';
-  const thisYear = new Date().getFullYear();
-  for(let y=thisYear-3;y<=thisYear+1;y++){ const o=document.createElement('option'); o.value=y; o.textContent=y; sel.appendChild(o); }
-  sel.value = thisYear;
-}
-
+/* ========== EVENT SIMPAN TRANSAKSI ========== */
 document.getElementById('formKas').addEventListener('submit', async function(e){
   e.preventDefault();
   const fd = new FormData(e.target);
@@ -761,31 +750,39 @@ document.getElementById('formKas').addEventListener('submit', async function(e){
   try{
     document.getElementById('loading').style.display = 'block';
     const res = await fetch(APP_POST_URL, { method:'POST', body: fd });
-    const text = await res.text();
-    document.getElementById('msg').innerHTML = text;
     document.getElementById('loading').style.display = 'none';
     e.target.reset();
-    await loadAndRender(Number(document.getElementById('bulan').value), Number(document.getElementById('tahun').value));
+    alert("Transaksi berhasil disimpan.");
   }catch(err){
     document.getElementById('loading').style.display = 'none';
     alert('Gagal simpan: '+err);
   }
 });
 
+/* ========== EVENT LAPORAN BULANAN (khusus 1 bulan) ========== */
 document.getElementById('lihat').addEventListener('click', async function(){
   const m = Number(document.getElementById('bulan').value);
   const y = Number(document.getElementById('tahun').value);
+
+  if(!m || !y){
+    alert("Pilih bulan & tahun.");
+    return;
+  }
+
   document.getElementById('laporan').innerHTML = '';
   document.getElementById('loadingLaporan').style.display = 'block';
+
   await loadAndRender(m,y);
 });
+
+/* ========== EVENT LAPORAN RENTANG BULAN ========== */
 document.getElementById('lihatRentang').addEventListener('click', async ()=>{
   const dari = Number(document.getElementById('dariBulan').value);
   const sampai = Number(document.getElementById('sampaiBulan').value);
-  const year = Number(document.getElementById('tahun').value);
+  const year = new Date().getFullYear();
 
   if(sampai < dari){
-    alert("Bulan akhir harus lebih besar atau sama dengan bulan awal.");
+    alert("Bulan akhir harus >= bulan awal.");
     return;
   }
 
@@ -795,31 +792,29 @@ document.getElementById('lihatRentang').addEventListener('click', async ()=>{
   await loadRentang(dari, sampai, year);
 });
 
-/* Download PDF (uses clone so UI buttons removed) */
+/* ========== DOWNLOAD PDF ========== */
 document.getElementById('downloadPDF').addEventListener('click', function(){
   const original = document.getElementById('laporan');
-  if(!original.innerHTML.trim()){ alert('Tampilkan dulu laporan sebelum download.'); return; }
+  if(!original.innerHTML.trim()){
+    alert('Tampilkan laporan dulu.');
+    return;
+  }
   const clone = original.cloneNode(true);
-  // remove interactive elements
   clone.querySelectorAll('.no-print, button').forEach(n => n.remove());
-  const opt = {
-    margin: 10, filename: `Laporan_Kas_${new Date().toISOString().slice(0,10)}.pdf`,
-    image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2, useCORS: true },
+  html2pdf().set({
+    margin: 10,
+    filename: `Laporan_Kas_${new Date().toISOString().slice(0,10)}.pdf`,
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: { scale: 2, useCORS: true },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().set(opt).from(clone).save();
+  }).from(clone).save();
 });
 
-/* Boot */
-initMonthDropdown();
-initYearDropdown();
-initRentangDropdown(); // <-- tambahan
+/* ========== BOOT ========== */
+/* Tidak ada loadAndRender otomatis! */
+initRentangDropdown();
 applyHeaderConfig();
-(async ()=>{
-  const m = Number(document.getElementById('bulan').value);
-  const y = Number(document.getElementById('tahun').value);
-  await loadAndRender(m,y);
-})();
+
 
 </script>
 </body>
