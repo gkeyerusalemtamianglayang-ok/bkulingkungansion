@@ -485,12 +485,11 @@ async function applyHeaderConfig(){
 async function loadAllTransactions(){
   const res = await fetch(CSV_URL, { cache: 'no-store' });
   const txt = await res.text();
-  const arr = parseCSV(txt); // array of objects
+  const arr = parseCSV(txt); 
 
-  // map keys flexibly and clean values
   return arr.map(r => {
     const keys = Object.keys(r);
-    const find = (k) => keys.find(x=> x.toLowerCase() === k) || null;
+    const find = (k) => keys.find(x => x.toLowerCase() === k) || null;
 
     const idKey = find('id');
     const tanggalKey = find('tanggal');
@@ -507,7 +506,7 @@ async function loadAllTransactions(){
     const rawBulan = bulanKey ? r[bulanKey] : "";
     const rawTahun = tahunKey ? r[tahunKey] : "";
 
-    // try parse date if bulan/tahun missing
+    // coba baca tanggal jika bulan/tahun kosong
     let parsedDate = rawTanggal ? new Date(rawTanggal) : new Date(NaN);
     let bulan = parseInt(rawBulan) || (isNaN(parsedDate.getMonth()) ? 0 : parsedDate.getMonth() + 1);
     let tahun = parseInt(rawTahun) || (isNaN(parsedDate.getFullYear()) ? new Date().getFullYear() : parsedDate.getFullYear());
