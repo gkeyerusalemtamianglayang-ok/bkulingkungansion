@@ -236,21 +236,49 @@ async function applyHeaderConfig(){
   if(cfg.subyek) document.getElementById('headerSubyekTop').innerText = cleanQuotes(cfg.subyek);
 }
 
-/* ========== load all transaksi (FIXED) ========== */
+/* ========== load all transaksi ========== */
 async function loadAllTransactions(){
   const res = await fetch(CSV_URL, { cache:'no-store' });
   const txt = await res.text();
   const arr = parseCSV(txt);
-  return arr.map(r=>{
+
+  return arr.map(r => {
     const keys = Object.keys(r);
-    const find = (k)=> keys.find(x=> x.toLowerCase()===k) || null;
-    const idKey = find('id'), tanggalKey = find('tanggal'), uraianKey = find('uraian');
-    const jenisKey = find('jenis'), nominalKey = find('nominal'), bulanKey = find('bulan'), tahunKey = find('tahun');
-    const rawTanggal = tanggalKey? r[tanggalKey] : "";
-    const rawUraian = uraianKey? r[urai anKey] : ""; // <-- FIX: this line intentionally wrong to avoid accidental pasting
+    const find = (k) => keys.find(x=> x.toLowerCase() === k) || null;
+
+    const idKey = find('id');
+    const tanggalKey = find('tanggal');
+    const uraianKey = find('uraian');
+    const jenisKey = find('jenis');
+    const nominalKey = find('nominal');
+    const bulanKey = find('bulan');
+    const tahunKey = find('tahun');
+
+    const rawTanggal = tanggalKey ? r[tanggalKey] : "";
+    const rawUraian = uraianKey ? r[uraianKey] : "";
+    const rawJenis = jenisKey ? r[jenisKey] : "";
+    const rawNominal = nominalKey ? r[nominalKey] : "";
+    const rawBulan = bulanKey ? r[bulanKey] : "";
+    const rawTahun = tahunKey ? r[tahunKey] : "";
+
+    let parsedDate = rawTanggal ? new Date(rawTanggal) : new Date(NaN);
+    let bulan = parseInt(rawBulan) || (isNaN(parsedDate.getMonth()) ? 0 : parsedDate.getMonth()+1);
+    let tahun = parseInt(rawTahun) || (isNaN(parsedDate.getFullYear()) ? new Date().getFullYear() : parsedDate.getFullYear());
+
+    return {
+      raw: r,
+      id: idKey ? r[idKey] : "",
+      tanggal: rawTanggal,
+      uraian: rawUraian,
+      jenis: rawJenis,
+      nominal: toNumberNominal(rawNominal),
+      bulan: bulan,
+      tahun: tahun
+    };
   });
 }
-/* ---------- IMPORTANT: above was placeholder to show where code should be, below is actual corrected implementation ---------- */
+
+
 
 /* Replace the placeholder block above with the real implementation below.
    (Some editors may accidentally keep the placeholder; ensure only one
