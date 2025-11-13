@@ -115,6 +115,16 @@
     font-weight: bold;
     color: green;
   }
+  #loading b, #loadingLaporan b {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
 </style>
 
 </head>
@@ -150,6 +160,14 @@
     </form>
 
     <div id="msg"></div>
+    <div id="loading" style="display:none; padding:10px; margin-top:10px; text-align:center;">
+  <b>Sedang memproses...</b>
+      <div id="loadingLaporan" style="display:none; padding:10px; margin-top:10px; text-align:center;">
+  <b>Memuat laporan...</b>
+</div>
+
+</div>
+
   </div>
 
   <!-- ========================= FILTER & LAPORAN ========================= -->
@@ -165,6 +183,9 @@
     <button id="lihat">Tampilkan Laporan</button>
     <a href="#" class="btn-sm" onclick="window.print()">Cetak / PDF</a>
 
+    <div id="loadingLaporan" style="display:none;">
+  <b>Memuat laporan...</b>
+</div>
     <div id="laporan"></div>
   </div>
 
@@ -182,11 +203,16 @@ document.getElementById("formKas").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = new FormData(e.target);
 
-  const res = await fetch(APP_POST_URL, { method: "POST", body: form });
-  const text = await res.text();
+  document.getElementById("loading").style.display = "block";
+document.getElementById("msg").innerHTML = "";
 
-  document.getElementById("msg").innerHTML = text;
-  e.target.reset();
+const res = await fetch(APP_POST_URL, { method: "POST", body: form });
+const text = await res.text();
+
+document.getElementById("loading").style.display = "none";
+document.getElementById("msg").innerHTML = text;
+
+e.target.reset();
 });
 
 
@@ -373,9 +399,15 @@ initMonthDropdown();
 
 
 // ================== TOMBOL TAMPIL ==================
-document.getElementById("lihat").addEventListener("click", ()=>{
+document.getElementById("lihat").addEventListener("click", async ()=>{
   const m = Number(document.getElementById("bulan").value);
-  loadAndRender(m);
+
+  document.getElementById("loadingLaporan").style.display = "block";
+  document.getElementById("laporan").innerHTML = "";
+
+  await loadAndRender(m);
+
+  document.getElementById("loadingLaporan").style.display = "none";
 });
 </script>
 
