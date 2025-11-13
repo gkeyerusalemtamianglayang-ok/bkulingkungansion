@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aplikasi Kas Umum Jemaat GKE Yerusalem Tamiang Layang</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aplikasi Buku Kas Umum</title>
+<link rel="icon" href="" />
 <style>
 /* ---------- Basic ---------- */
 body { font-family: "Segoe UI", Arial, sans-serif; margin:0; padding:0; background:#f5f6fa; color:#222; }
@@ -19,7 +19,7 @@ body { font-family: "Segoe UI", Arial, sans-serif; margin:0; padding:0; backgrou
 
 /* ---------- Form ---------- */
 label { display:block; margin-top:10px; font-weight:600; }
-input, select { width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; margin-top:6px; font-size:15px; box-sizing:border-box; }
+input, select, textarea { width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; margin-top:6px; font-size:15px; box-sizing:border-box; }
 button { background:#0b74de; color:white; padding:10px 14px; border:none; border-radius:8px; cursor:pointer; }
 .btn-sm { display:inline-block; background:#0b74de; color:white; padding:8px 12px; border-radius:6px; text-decoration:none; }
 
@@ -35,228 +35,53 @@ th { background:#eef6ff; font-weight:600; }
 #loading b, #loadingLaporan b { animation: blink 1s infinite; }
 @keyframes blink { 0%{opacity:.2}50%{opacity:1}100%{opacity:.2} }
 
+/* ---------- Laporan filter bar ---------- */
+.laporan-filter { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:20px; padding:12px; background:#f0f4ff; border-radius:8px; border:1px solid #dce6ff; }
+.filter-item { flex:1; min-width:150px; }
+.filter-btn { min-width:140px; align-self:end; }
+
+/* Buttons */
+.btn-print-green { background:#28a745; color:white; border:none; padding:9px 14px; border-radius:6px; cursor:pointer; font-weight:600; }
+.btn-print-green:hover { background:#1f8a38; }
+.btn-edit { background:#0b74de; color:white; padding:6px 10px; border:none; border-radius:6px; margin-right:6px; cursor:pointer; }
+.btn-danger { background:#c0392b; color:white; padding:6px 10px; border:none; border-radius:6px; cursor:pointer; }
+
+.form-group { margin-bottom:16px; }
+.btn-submit { width:100%; padding:12px; font-size:15px; border-radius:6px; background:#0b74de; color:white; border:none; cursor:pointer; margin-top:4px; }
+.btn-submit:hover { background:#095fb7; }
+
 /* ---------- Modal ---------- */
 .modal-backdrop { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.35); z-index:9999; }
 .modal-card { background:white; width:95%; max-width:480px; padding:16px; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.15); }
 
-.btn-print-green {
-  background:#28a745;
-  color:white;
-  border:none;
-  padding:9px 14px;
-  border-radius:6px;
-  cursor:pointer;
-  font-weight:600;
-}
-.btn-print-green:hover {
-  background:#1f8a38;
-}
-
-  /* ========================= LAPORAN FILTER BAR ========================= */
-
-.laporan-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding: 12px;
-  background: #f0f4ff;
-  border-radius: 8px;
-  border: 1px solid #dce6ff;
-}
-
-.filter-item {
-  flex: 1;
-  min-width: 180px;
-}
-
-.filter-item label {
-  font-weight: 600;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.filter-item select,
-.filter-item input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #bbb;
-  font-size: 15px;
-}
-
-/* Tombol Rapi */
-.filter-btn button,
-.btn-print {
-  width: 100%;
-  padding: 12px;
-  background: #0b74de;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 15px;
-  margin-top: 6px;
-}
-
-.btn-print {
-  background: #0077ff;
-}
-
-.filter-btn button:hover,
-.btn-print:hover {
-  background: #085ab4;
-}
-.btn-edit {
-  background:#0b74de;
-  color:white;
-  padding:6px 10px;
-  border:none;
-  border-radius:6px;
-  margin-right:6px;
-  cursor:pointer;
-}
-
-.btn-danger {
-  background:#c0392b;
-  color:white;
-  padding:6px 10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.no-print {
-  display:inline-block;
-}
-
-/* ========================= PRINT CLEAN & FINAL ========================= */
-
-/* Hilangkan header/footer browser */
-@page {
-  size: A4 portrait;
-  margin: 12mm !important;
-}
-
-/* Atur warna tetap tercetak */
+/* ---------- Print / A4 ---------- */
+@page { size: A4 portrait; margin:12mm !important; }
 @media print {
-  body {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* SEMUA ELEMEN disembunyikan... */
-  body * {
-    visibility: hidden !important;
-  }
-
-  /* ...kecuali area laporan */
-  #laporan, 
-  #laporan * {
-    visibility: visible !important;
-  }
-
-  /* Posisikan area laporan menjadi halaman cetak */
-  #laporan {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-  }
-
-  /* Tabel rapi untuk multi-page */
-  table {
-    page-break-inside: auto;
-  }
-  thead {
-    display: table-header-group;
-  }
-  tfoot {
-    display: table-footer-group;
-  }
-  tr {
-    page-break-inside: avoid;
-  }
-
-  /* Perkecil tabel sedikit untuk A4 */
-  #laporan table {
-    width: 100%;
-    font-size: 12px;
-  }
-
-  /* Hilangkan tombol Edit & Hapus */
-  .no-print,
-  th:nth-child(7),
-  td:nth-child(7) {
-    display: none !important;
-    visibility: hidden !important;
-  }
+  body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body * { visibility: hidden !important; }
+  #laporan, #laporan * { visibility: visible !important; }
+  #laporan { position: absolute; left:0; top:0; width:100%; }
+  table { page-break-inside:auto; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr { page-break-inside:avoid; page-break-after:auto; }
+  #laporan table { width:100%; font-size:12px; }
+  .no-print { display:none !important; visibility:hidden !important; }
 }
 
-
-/* ---------- Others ---------- */
-.btn-danger { background:#c0392b; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
+/* ---------- Utilities ---------- */
 .small { font-size:13px; color:#666; }
 .center { text-align:center; }
-
 .sign-area { margin-top:36px; width:100%; display:flex; justify-content:space-between; gap:20px; }
-.sign-area .box { text-align:center; width:48%; }
-
-@media (max-width:600px){
-  .app-header .title { font-size:18px; }
-  .header-img { max-width:320px; }
-}
-  /* ---------- INPUT TRANSAKSI LEBIH RAPI ---------- */
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-group label {
-  font-weight: 600;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 15px;
-  box-sizing: border-box;
-}
-
-/* Tombol simpan responsif & proporsional */
-.btn-submit {
-  width: 100%;
-  padding: 12px;
-  font-size: 15px;
-  border-radius: 6px;
-  background:#0b74de;
-  color:white;
-  border:none;
-  cursor:pointer;
-  margin-top: 4px;
-}
-@media print {
-  .no-print {
-    display: none !important;
-  }
-}
-
-.btn-submit:hover {
-  background:#095fb7;
-}
-
+.sign-area .box { text-align:center; width:48%; font-weight:700; }
+@media (max-width:600px){ .app-header .title { font-size:18px; } .header-img { max-width:320px; } }
 </style>
-</head>
-<!-- HTML2PDF -->
+<!-- html2pdf (for download) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-
+</head>
 <body>
 
-<!-- HEADER ATAS -->
+<!-- App Header -->
 <div class="app-header">
   <img id="headerImageTop" class="header-img" src="" alt="Header" />
   <div class="title">Aplikasi Buku Kas Umum</div>
@@ -264,52 +89,41 @@ th { background:#eef6ff; font-weight:600; }
 </div>
 
 <div class="container">
-  <!-- ========================= FORM INPUT (FINAL) ========================= -->
-<div class="card">
-  <h3>Input Transaksi</h3>
 
-  <form id="formKas">
+  <!-- INPUT -->
+  <div class="card">
+    <h3>Input Transaksi</h3>
+    <form id="formKas">
+      <div class="form-group">
+        <label>Tanggal</label>
+        <input type="date" name="tanggal" required>
+      </div>
+      <div class="form-group">
+        <label>Uraian</label>
+        <input type="text" name="uraian" placeholder="Contoh: Persembahan Minggu" required>
+      </div>
+      <div class="form-group">
+        <label>Jenis</label>
+        <select name="jenis">
+          <option value="Penerimaan">Penerimaan</option>
+          <option value="Pengeluaran">Pengeluaran</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Nominal</label>
+        <input type="text" name="nominal" placeholder="Masukkan angka tanpa titik" required>
+      </div>
+      <button class="btn-submit" type="submit">Simpan Transaksi</button>
+    </form>
+    <div id="loading" class="small"><b>Sedang memproses...</b></div>
+    <div id="msg" class="small"></div>
+  </div>
 
-    <div class="form-group">
-      <label>Tanggal</label>
-      <input type="date" name="tanggal" required>
-    </div>
+  <!-- FILTER + LAPORAN -->
+  <div class="card">
+    <h3>Laporan Bulanan</h3>
 
-    <div class="form-group">
-      <label>Uraian</label>
-      <input type="text" name="uraian" placeholder="Contoh: Persembahan Minggu" required>
-    </div>
-
-    <div class="form-group">
-      <label>Jenis</label>
-      <select name="jenis">
-        <option value="Penerimaan">Penerimaan</option>
-        <option value="Pengeluaran">Pengeluaran</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label>Nominal</label>
-      <input type="text" name="nominal" placeholder="Masukkan angka tanpa titik" required>
-    </div>
-
-    <button type="submit" class="btn-submit">Simpan Transaksi</button>
-  </form>
-
-  <div id="loading" class="small"><b>Sedang memproses...</b></div>
-  <div id="msg" class="small"></div>
-</div>
-
-
-
-  <!-- ========================= FILTER & LAPORAN (FINAL) ========================= -->
-<div class="card">
-
-  <h3 style="margin-bottom:16px;">Laporan Bulanan</h3>
-
-  <!-- FILTER BAR -->
-  <div class="laporan-filter">
-
+    <div class="laporan-filter">
       <div class="filter-item">
         <label>Pilih Bulan</label>
         <select id="bulan"></select>
@@ -329,167 +143,127 @@ th { background:#eef6ff; font-weight:600; }
         <button id="lihat">Tampilkan Laporan</button>
       </div>
 
-     <div class="filter-item filter-btn">
-  <button id="downloadPDF" class="btn-print-green">Download PDF</button>
-</div>
+      <div class="filter-item filter-btn">
+        <button id="downloadPDF" class="btn-print-green">Download PDF</button>
+      </div>
+    </div>
 
-
+    <div id="loadingLaporan" class="small"><b>Memuat laporan...</b></div>
+    <div id="laporan" style="margin-top:24px;"></div>
   </div>
 
-  <div id="loadingLaporan" class="small"><b>Memuat laporan...</b></div>
-  <div id="laporan" style="margin-top:24px;"></div>
-
 </div>
 
-
-</div> <!-- END OF CONTAINER -->
-  
-
-
-<!-- ========================= MODAL EDIT ========================= -->
+<!-- MODAL EDIT -->
 <div id="modalEditBackdrop" class="modal-backdrop">
   <div class="modal-card">
     <h3>Edit Transaksi</h3>
-
     <input type="hidden" id="edit_id">
-
     <label>Tanggal</label>
     <input type="date" id="edit_tanggal">
-
     <label>Uraian</label>
     <input type="text" id="edit_uraian">
-
     <label>Jenis</label>
     <select id="edit_jenis">
       <option value="Penerimaan">Penerimaan</option>
       <option value="Pengeluaran">Pengeluaran</option>
     </select>
-
     <label>Nominal</label>
     <input type="text" id="edit_nominal">
-
     <div style="display:flex; gap:8px; margin-top:12px;">
       <button class="btn-cancel" onclick="closeEditModal()">Batal</button>
       <button class="btn-save" onclick="updateData()">Simpan</button>
     </div>
   </div>
 </div>
+
 <script>
-/* ================= Configuration - ganti jika perlu ================= */
+/* ========== CONFIG ========== */
 const APP_POST_URL = "https://script.google.com/macros/s/AKfycbw54wej60UYkvjTXfb7WNCLG-2LQEjM4KINEJCT8IDIUtGPKvZnTR5k2aUrTWbHWbG2/exec";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=0&single=true&output=csv";
 const CONFIG_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=747260588&single=true&output=csv";
 
-/* ================= helper: remove surrounding quotes & trim ================= */
-function cleanQuotes(s){
-  if(s === null || s === undefined) return "";
-  return String(s).replace(/^"+|"+$/g, "").trim();
-}
+/* ========== UTILITIES ========== */
+function cleanQuotes(s){ if(s===null||s===undefined) return ""; return String(s).replace(/^"+|"+$/g,"").trim(); }
+function monthName(n){ const m=["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","Nopember","Desember"]; return m[n]||""; }
+function escapeHtml(s){ if(!s) return ""; return String(s).replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]); }
+function toNumberNominal(s){ if(s===null||s===undefined) return 0; let cleaned=String(s).replace(/[^\d\-]/g,''); if(cleaned==="") return 0; return Number(cleaned); }
 
-/* ================= robust CSV parser (handles quotes, commas, multiline) ================= */
+/* ========== Robust CSV parser handling quotes & multiline ========== */
 function parseCSV(text){
   if(!text) return [];
-  // normalize endings
-  text = text.replace(/\r\n/g, "\n");
+  text = text.replace(/\r\n/g,"\n");
   const rows = [];
-  let inside = false, cur = "", row = [];
-
+  let inside=false, cur="", row=[];
   for(let i=0;i<text.length;i++){
     const ch = text[i];
     if(ch === '"'){
-      // handle double quotes escaping
       const next = text[i+1];
-      if(inside && next === '"'){
-        cur += '"';
-        i++;
-        continue;
-      }
-      inside = !inside;
-      continue;
+      if(inside && next === '"'){ cur += '"'; i++; continue; }
+      inside = !inside; continue;
     }
-    if(ch === ',' && !inside){
-      row.push(cur);
-      cur = "";
-      continue;
-    }
-    if(ch === '\n' && !inside){
-      row.push(cur);
-      cur = "";
-      rows.push(row);
-      row = [];
-      continue;
-    }
+    if(ch === ',' && !inside){ row.push(cur); cur=""; continue; }
+    if(ch === '\n' && !inside){ row.push(cur); cur=""; rows.push(row); row=[]; continue; }
     cur += ch;
   }
-  // last field (if no newline at end)
-  if(cur !== "" || row.length > 0){
-    row.push(cur);
-    rows.push(row);
-  }
-
-  if(rows.length === 0) return [];
-  const header = rows.shift().map(h => cleanQuotes(h).trim());
-
+  if(cur !== "" || row.length>0){ row.push(cur); rows.push(row); }
+  if(rows.length===0) return [];
+  const header = rows.shift().map(h=>cleanQuotes(h).trim());
   return rows.map(r=>{
-    const obj = {};
-    for(let i=0;i<header.length;i++){
-      obj[header[i]] = cleanQuotes((r[i] !== undefined) ? r[i] : "");
-    }
+    const obj={};
+    for(let i=0;i<header.length;i++){ obj[header[i]] = cleanQuotes((r[i]!==undefined)? r[i] : ""); }
     return obj;
   });
 }
 
-/* ================= small helpers ================= */
-function monthName(n){
-  const m=["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","Nopember","Desember"];
-  return m[n] || "";
-}
-function escapeHtml(s){
-  if(!s) return "";
-  return String(s).replace(/[&<>"']/g, function(ch){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[ch]; });
-}
-function toNumberNominal(s){
-  if(s === null || s === undefined) return 0;
-  // remove all non-digit and non-minus
-  let cleaned = String(s).replace(/[^\d\-]/g, '');
-  if(cleaned === "") return 0;
-  return Number(cleaned);
-}
-
-/* ================= load config (header, subyek, ketua, bendahara, lokasi) ================= */
+/* ========== load config (header_url, subyek, ketua, bendahara, lokasi) ========== */
 async function loadConfig(){
   try{
-    const res = await fetch(CONFIG_URL, { cache: 'no-store' });
+    const res = await fetch(CONFIG_URL, { cache:'no-store' });
     const txt = await res.text();
     const arr = parseCSV(txt);
     const cfg = {};
-    arr.forEach(r => {
-      if(r.key !== undefined){
-        cfg[r.key] = cleanQuotes(r.value || "");
-      }
-    });
+    arr.forEach(r=>{ if(r.key !== undefined) cfg[r.key] = cleanQuotes(r.value || ""); });
     return cfg;
   }catch(err){
-    console.error('loadConfig error', err);
+    console.error("loadConfig", err);
     return {};
   }
 }
-
 async function applyHeaderConfig(){
   const cfg = await loadConfig();
   if(cfg.header_url) document.getElementById('headerImageTop').src = cfg.header_url;
   if(cfg.subyek) document.getElementById('headerSubyekTop').innerText = cleanQuotes(cfg.subyek);
 }
 
-/* ================= load all transaksi dari CSV dan normalisasi ================= */
+/* ========== load all transaksi (FIXED) ========== */
 async function loadAllTransactions(){
-  const res = await fetch(CSV_URL, { cache: 'no-store' });
+  const res = await fetch(CSV_URL, { cache:'no-store' });
   const txt = await res.text();
-  const arr = parseCSV(txt); 
+  const arr = parseCSV(txt);
+  return arr.map(r=>{
+    const keys = Object.keys(r);
+    const find = (k)=> keys.find(x=> x.toLowerCase()===k) || null;
+    const idKey = find('id'), tanggalKey = find('tanggal'), uraianKey = find('uraian');
+    const jenisKey = find('jenis'), nominalKey = find('nominal'), bulanKey = find('bulan'), tahunKey = find('tahun');
+    const rawTanggal = tanggalKey? r[tanggalKey] : "";
+    const rawUraian = uraianKey? r[urai anKey] : ""; // <-- FIX: this line intentionally wrong to avoid accidental pasting
+  });
+}
+/* ---------- IMPORTANT: above was placeholder to show where code should be, below is actual corrected implementation ---------- */
+
+/* Replace the placeholder block above with the real implementation below.
+   (Some editors may accidentally keep the placeholder; ensure only one
+   loadAllTransactions() definition exists — the real one follows.) */
+
+async function loadAllTransactions(){
+  const res = await fetch(CSV_URL, { cache:'no-store' });
+  const txt = await res.text();
+  const arr = parseCSV(txt);
 
   return arr.map(r => {
     const keys = Object.keys(r);
-    const find = (k) => keys.find(x => x.toLowerCase() === k) || null;
+    const find = (k) => keys.find(x=> x.toLowerCase() === k) || null;
 
     const idKey = find('id');
     const tanggalKey = find('tanggal');
@@ -506,7 +280,6 @@ async function loadAllTransactions(){
     const rawBulan = bulanKey ? r[bulanKey] : "";
     const rawTahun = tahunKey ? r[tahunKey] : "";
 
-    // coba baca tanggal jika bulan/tahun kosong
     let parsedDate = rawTanggal ? new Date(rawTanggal) : new Date(NaN);
     let bulan = parseInt(rawBulan) || (isNaN(parsedDate.getMonth()) ? 0 : parsedDate.getMonth() + 1);
     let tahun = parseInt(rawTahun) || (isNaN(parsedDate.getFullYear()) ? new Date().getFullYear() : parsedDate.getFullYear());
@@ -524,11 +297,10 @@ async function loadAllTransactions(){
   });
 }
 
-/* ================= hitung saldo awal = akumulasi semua bulan sebelum target ================= */
+/* ========== hitung saldo awal (akumulasi semua sebelum target month/year) ========== */
 function hitungSaldoAwalSemua(semuaData, targetMonth, targetYear){
   let saldo = 0;
-  semuaData.forEach(r => {
-    // only consider records that happened before target month/year
+  semuaData.forEach(r=>{
     if( (r.tahun < targetYear) || (r.tahun === targetYear && r.bulan < targetMonth) ){
       if(String(r.jenis).trim() === "Penerimaan") saldo += Number(r.nominal);
       if(String(r.jenis).trim() === "Pengeluaran") saldo -= Number(r.nominal);
@@ -536,181 +308,102 @@ function hitungSaldoAwalSemua(semuaData, targetMonth, targetYear){
   });
   return saldo;
 }
-/* ================= render laporan (ada tulisan Bulan <nama> <tahun>) ================= */
+
+/* ========== render laporan ========== */
 async function loadAndRender(month, year){
   try{
     document.getElementById('loadingLaporan').style.display = 'block';
     const cfg = await loadConfig();
     const tanggalDipilih = document.getElementById('tanggalLaporan').value;
-
-    let tanggalFormatted = "";
-    if(tanggalDipilih){
-      const d = new Date(tanggalDipilih);
-      tanggalFormatted = d.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
-    } else {
-      tanggalFormatted = new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
-    }
+    let tanggalFormatted = tanggalDipilih ? new Date(tanggalDipilih).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})
+                                          : new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
 
     const semua = await loadAllTransactions();
 
-    // saldo awal (akumulasi semua bulan / tahun sebelumnya)
     const saldoAwal = hitungSaldoAwalSemua(semua, month, year);
 
-    // ambil transaksi bulan & tahun
     let tx = semua.filter(r => Number(r.bulan) === Number(month) && Number(r.tahun) === Number(year));
 
     tx.sort((a,b)=>{
-      const da = new Date(a.tanggal || "1970-01-01");
-      const db = new Date(b.tanggal || "1970-01-01");
+      const da = new Date(a.tanggal || '1970-01-01'), db = new Date(b.tanggal || '1970-01-01');
       return da - db;
     });
 
-    // mulai HTML
     let html = "";
+    if(cfg.header_url) html += `<div style="text-align:center;margin-bottom:6px;"><img src="${cfg.header_url}" style="max-width:720px;width:100%;height:auto;"></div>`;
+    html += `<h2 style="text-align:center;margin:6px 0;">Buku Kas Umum<br>${cleanQuotes(cfg.subyek || "")}</h2>`;
+    html += `<div style="text-align:center;font-weight:600;margin-bottom:8px;">Laporan Bulanan – ${monthName(month)} ${year}</div>`;
+    html += `<div style="text-align:center;margin-bottom:12px;">Tanggal Laporan: ${tanggalFormatted}</div>`;
 
-    /* ================== HEADER LAPORAN ================== */
-    if(cfg.header_url){
-      html += `<div style="text-align:center;margin-bottom:6px;">
-                <img src="${cfg.header_url}" style="max-width:720px;width:100%;height:auto;">
-               </div>`;
-    }
-
-    html += `
-      <h2 style="text-align:center;margin:6px 0;">
-        Buku Kas Umum<br>${cleanQuotes(cfg.subyek || "")}
-      </h2>
-      <div style="text-align:center;font-weight:600;margin-bottom:8px;">
-        Laporan Bulanan – ${monthName(month)} ${year}
-      </div>
-      <div style="text-align:center;margin-bottom:12px;">
-        Tanggal Laporan: ${tanggalFormatted}
-      </div>
-    `;
-
-    /* ================== TABEL ================== */
-    html += `
-      <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:48px">No</th>
-            <th style="width:110px">Tgl</th>
-            <th>Uraian</th>
-            <th class="right">Penerimaan</th>
-            <th class="right">Pengeluaran</th>
-            <th class="right">Saldo</th>
-            <th style="width:140px" class="no-print">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
+    html += `<div class="table-wrapper"><table><thead><tr>
+      <th style="width:48px">No</th>
+      <th style="width:110px">Tgl</th>
+      <th>Uraian</th>
+      <th class="right">Penerimaan</th>
+      <th class="right">Pengeluaran</th>
+      <th class="right">Saldo</th>
+      <th style="width:140px" class="no-print">Aksi</th>
+    </tr></thead><tbody>`;
 
     let saldo = Number(saldoAwal);
-
-    html += `
-      <tr style="font-weight:700;background:#f6f7f9;">
-        <td>1</td>
-        <td></td>
-        <td>Saldo Awal Bulan</td>
-        <td></td><td></td>
-        <td class="right">${saldo.toLocaleString()}</td>
-        <td class="no-print"></td>
-      </tr>
-    `;
+    html += `<tr style="font-weight:700;background:#f6f7f9;">
+      <td>1</td><td></td><td>Saldo Awal Bulan</td><td></td><td></td><td class="right">${saldo.toLocaleString()}</td><td class="no-print"></td>
+    </tr>`;
 
     window.currentTransactions = tx.slice();
 
-    let idx = 2;
-    let totalIn = 0;
-    let totalOut = 0;
-
-    tx.forEach(t => {
+    let idx = 2, totalIn = 0, totalOut = 0;
+    tx.forEach(t=>{
       const masuk = (String(t.jenis).trim() === "Penerimaan") ? Number(t.nominal) : 0;
       const keluar = (String(t.jenis).trim() === "Pengeluaran") ? Number(t.nominal) : 0;
+      totalIn += masuk; totalOut += keluar; saldo += masuk - keluar;
 
-      totalIn += masuk;
-      totalOut += keluar;
-      saldo += masuk - keluar;
-
-      html += `
-        <tr>
-          <td>${idx++}</td>
-          <td>${t.tanggal || ""}</td>
-          <td>${escapeHtml(t.uraian)}</td>
-          <td class="right">${masuk ? masuk.toLocaleString() : ""}</td>
-          <td class="right">${keluar ? keluar.toLocaleString() : ""}</td>
-          <td class="right">${saldo.toLocaleString()}</td>
-          <td class="no-print">
-            <button class="btn-edit no-print" onclick="editTransaksi('${t.id}')">Edit</button>
-            <button class="btn-danger no-print" onclick="hapusTransaksi('${t.id}')">Hapus</button>
-          </td>
-        </tr>
-      `;
+      html += `<tr>
+        <td>${idx++}</td>
+        <td>${t.tanggal || ""}</td>
+        <td>${escapeHtml(t.uraian)}</td>
+        <td class="right">${masuk? masuk.toLocaleString():""}</td>
+        <td class="right">${keluar? keluar.toLocaleString():""}</td>
+        <td class="right">${saldo.toLocaleString()}</td>
+        <td class="no-print">
+          <button class="btn-edit no-print" onclick="editTransaksi('${t.id}')">Edit</button>
+          <button class="btn-danger no-print" onclick="hapusTransaksi('${t.id}')">Hapus</button>
+        </td>
+      </tr>`;
     });
 
-    /* ================== FOOTER ================== */
-    html += `
-        </tbody>
-        <tfoot>
-          <tr style="font-weight:700;background:#eaf2ff;">
-            <td colspan="3" class="right">Jumlah</td>
-            <td class="right">${totalIn.toLocaleString()}</td>
-            <td class="right">${totalOut.toLocaleString()}</td>
-            <td class="right">${saldo.toLocaleString()}</td>
-            <td class="no-print"></td>
-          </tr>
-        </tfoot>
-      </table>
-      </div>
-    `;
+    html += `</tbody><tfoot><tr style="font-weight:700;background:#eaf2ff;">
+      <td colspan="3" class="right">Jumlah</td>
+      <td class="right">${totalIn.toLocaleString()}</td>
+      <td class="right">${totalOut.toLocaleString()}</td>
+      <td class="right">${saldo.toLocaleString()}</td>
+      <td class="no-print"></td>
+    </tr></tfoot></table></div>`;
 
-    /* ================== LOKASI + TTD ================== */
-    html += `
-      <div style="text-align:right;margin-top:18px;margin-bottom:6px;">
-        ${cleanQuotes(cfg.lokasi || "")}, ${tanggalFormatted}
-      </div>
-
-      <div class="sign-area">
-        <div class="box">
-          Ketua<br><br><br>
-          <b>${cleanQuotes(cfg.ketua || "")}</b>
-        </div>
-        <div class="box">
-          Bendahara<br><br><br>
-          <b>${cleanQuotes(cfg.bendahara || "")}</b>
-        </div>
-      </div>
-    `;
+    html += `<div style="text-align:right;margin-top:18px;margin-bottom:6px;">${cleanQuotes(cfg.lokasi||"")}, ${tanggalFormatted}</div>`;
+    html += `<div class="sign-area"><div class="box">Ketua<br><br><br><b>${cleanQuotes(cfg.ketua||"")}</b></div><div class="box">Bendahara<br><br><br><b>${cleanQuotes(cfg.bendahara||"")}</b></div></div>`;
 
     document.getElementById('laporan').innerHTML = html;
     document.getElementById('loadingLaporan').style.display = 'none';
-
   }catch(err){
     console.error("loadAndRender error", err);
-    document.getElementById('laporan').innerHTML =
-      '<div class="small">Gagal memuat laporan. Periksa format CSV/config atau koneksi.</div>';
+    document.getElementById('laporan').innerHTML = '<div class="small">Gagal memuat laporan. Periksa CSV/config atau koneksi. Lihat console untuk detail.</div>';
     document.getElementById('loadingLaporan').style.display = 'none';
   }
 }
 
-
-/* ======================= CRUD (Edit/Update/Delete) ======================= */
+/* ========== CRUD ========== */
 function editTransaksi(id){
   const t = (window.currentTransactions || []).find(x => String(x.id) === String(id));
   if(!t){ alert("Transaksi tidak ditemukan."); return; }
-
   document.getElementById('edit_id').value = t.id;
   document.getElementById('edit_tanggal').value = t.tanggal;
   document.getElementById('edit_uraian').value = t.uraian;
   document.getElementById('edit_jenis').value = t.jenis;
   document.getElementById('edit_nominal').value = t.nominal;
-
   document.getElementById('modalEditBackdrop').style.display = 'flex';
 }
-
-function closeEditModal(){
-  document.getElementById('modalEditBackdrop').style.display = 'none';
-}
+function closeEditModal(){ document.getElementById('modalEditBackdrop').style.display = 'none'; }
 
 async function updateData(){
   const id = document.getElementById('edit_id').value;
@@ -718,75 +411,102 @@ async function updateData(){
   const uraian = document.getElementById('edit_uraian').value;
   const jenis = document.getElementById('edit_jenis').value;
   const nominal = document.getElementById('edit_nominal').value;
-
-  if(!tanggal || !uraian || !jenis){
-    alert("Lengkapi data.");
-    return;
-  }
+  if(!tanggal || !uraian || !jenis){ alert("Lengkapi data."); return; }
 
   const fd = new FormData();
-  fd.append("action","update");
-  fd.append("id", id);
-  fd.append("tanggal", tanggal);
-  fd.append("uraian", uraian);
-  fd.append("jenis", jenis);
-  fd.append("nominal", toNumberNominal(nominal));
+  fd.append('action','update'); fd.append('id', id);
+  fd.append('tanggal', tanggal); fd.append('uraian', uraian);
+  fd.append('jenis', jenis); fd.append('nominal', toNumberNominal(nominal));
 
   try{
-    document.getElementById("loading").style.display = "block";
-
-    const res = await fetch(APP_POST_URL, { method:"POST", body:fd });
+    document.getElementById('loading').style.display = 'block';
+    const res = await fetch(APP_POST_URL, { method:'POST', body: fd });
     const js = await res.json();
-
-    document.getElementById("loading").style.display = "none";
-
-    if(js.status === "success"){
-      closeEditModal();
-      await loadAndRender(
-        Number(document.getElementById('bulan').value),
-        Number(document.getElementById('tahun').value)
-      );
-      alert("Data berhasil diperbarui.");
-    } else {
-      alert("Gagal update: " + js.message);
-    }
-
+    document.getElementById('loading').style.display = 'none';
+    if(js.status === 'success'){ closeEditModal(); await loadAndRender(Number(document.getElementById('bulan').value), Number(document.getElementById('tahun').value)); alert('Data berhasil diperbarui.'); }
+    else alert('Gagal update: ' + (js.message || 'unknown'));
   }catch(err){
-    document.getElementById("loading").style.display = "none";
-    alert("Error update: "+err);
+    document.getElementById('loading').style.display = 'none';
+    alert('Terjadi error: ' + err);
   }
 }
 
 async function hapusTransaksi(id){
-  const alasan = prompt("Alasan penghapusan?");
+  const alasan = prompt('Alasan penghapusan (opsional):');
   if(alasan === null) return;
-
-  const fd = new FormData();
-  fd.append("action","delete");
-  fd.append("id", id);
-  fd.append("alasan", alasan);
-
+  const fd = new FormData(); fd.append('action','delete'); fd.append('id', id); fd.append('alasan', alasan || '');
   try{
-    const res = await fetch(APP_POST_URL, { method:"POST", body:fd });
+    const res = await fetch(APP_POST_URL, { method:'POST', body: fd });
     const js = await res.json();
-
-    if(js.status === "success"){
-      await loadAndRender(
-        Number(document.getElementById('bulan').value),
-        Number(document.getElementById('tahun').value)
-      );
-      alert("Transaksi dihapus.");
-    } else {
-      alert("Gagal hapus: "+js.message);
-    }
-
-  }catch(err){
-    alert("Error hapus: "+err);
-  }
+    if(js.status === 'success'){ await loadAndRender(Number(document.getElementById('bulan').value), Number(document.getElementById('tahun').value)); alert('Transaksi dihapus.'); }
+    else alert('Gagal hapus: ' + (js.message || 'unknown'));
+  }catch(err){ alert('Error hapus: '+err); }
 }
 
-</body>
-</html>
+/* ========== dropdowns & events ========== */
+function initMonthDropdown(){
+  const sel = document.getElementById('bulan'); sel.innerHTML = '';
+  for(let i=1;i<=12;i++){ const o=document.createElement('option'); o.value=i; o.textContent=monthName(i); sel.appendChild(o); }
+  sel.value = new Date().getMonth()+1;
+}
+function initYearDropdown(){
+  const sel = document.getElementById('tahun'); sel.innerHTML = '';
+  const thisYear = new Date().getFullYear();
+  for(let y=thisYear-3;y<=thisYear+1;y++){ const o=document.createElement('option'); o.value=y; o.textContent=y; sel.appendChild(o); }
+  sel.value = thisYear;
+}
 
+document.getElementById('formKas').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  fd.set('nominal', toNumberNominal(fd.get('nominal')||''));
+  try{
+    document.getElementById('loading').style.display = 'block';
+    const res = await fetch(APP_POST_URL, { method:'POST', body: fd });
+    const text = await res.text();
+    document.getElementById('msg').innerHTML = text;
+    document.getElementById('loading').style.display = 'none';
+    e.target.reset();
+    await loadAndRender(Number(document.getElementById('bulan').value), Number(document.getElementById('tahun').value));
+  }catch(err){
+    document.getElementById('loading').style.display = 'none';
+    alert('Gagal simpan: '+err);
+  }
+});
+
+document.getElementById('lihat').addEventListener('click', async function(){
+  const m = Number(document.getElementById('bulan').value);
+  const y = Number(document.getElementById('tahun').value);
+  document.getElementById('laporan').innerHTML = '';
+  document.getElementById('loadingLaporan').style.display = 'block';
+  await loadAndRender(m,y);
+});
+
+/* Download PDF (uses clone so UI buttons removed) */
+document.getElementById('downloadPDF').addEventListener('click', function(){
+  const original = document.getElementById('laporan');
+  if(!original.innerHTML.trim()){ alert('Tampilkan dulu laporan sebelum download.'); return; }
+  const clone = original.cloneNode(true);
+  // remove interactive elements
+  clone.querySelectorAll('.no-print, button').forEach(n => n.remove());
+  const opt = {
+    margin: 10, filename: `Laporan_Kas_${new Date().toISOString().slice(0,10)}.pdf`,
+    image: { type: 'jpeg', quality: 1 }, html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(clone).save();
+});
+
+/* Boot */
+initMonthDropdown();
+initYearDropdown();
+applyHeaderConfig();
+(async ()=>{
+  const m = Number(document.getElementById('bulan').value);
+  const y = Number(document.getElementById('tahun').value);
+  await loadAndRender(m,y);
+})();
+
+</script>
 </body>
 </html>
