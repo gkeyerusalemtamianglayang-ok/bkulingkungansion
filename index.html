@@ -761,6 +761,38 @@ document.getElementById('formKas').addEventListener('submit', async function(e){
 });
 
 /* ========== EVENT LAPORAN BULANAN (khusus 1 bulan) ========== */
+  function initMonthDropdown(){
+  const sel = document.getElementById('bulan');
+  if(!sel) return;
+
+  sel.innerHTML = "";
+
+  for(let i=1;i<=12;i++){
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = monthName(i);
+    sel.appendChild(o);
+  }
+
+  sel.value = new Date().getMonth()+1;
+}
+function initYearDropdown(){
+  const sel = document.getElementById('tahun');
+  if(!sel) return;
+
+  sel.innerHTML = "";
+
+  const current = new Date().getFullYear();
+  for(let y=current-3; y <= current+1; y++){
+    const o = document.createElement('option');
+    o.value = y;
+    o.textContent = y;
+    sel.appendChild(o);
+  }
+
+  sel.value = current;
+}
+
 document.getElementById('lihat').addEventListener('click', async function(){
   const m = Number(document.getElementById('bulan').value);
   const y = Number(document.getElementById('tahun').value);
