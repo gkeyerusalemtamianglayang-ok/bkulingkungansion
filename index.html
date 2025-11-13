@@ -4,168 +4,92 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aplikasi Kas Umum Jemaat GKE Yerusalem Tamiang Layang</title>
-
 <style>
-  body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #f5f6fa;
-  }
-.header-img {
-  width: 100%;
-  max-width: 480px;  /* ukuran ideal */
-  height: auto;
-  margin: 0 auto 14px auto;
-  display: block;
+/* ---------- Basic ---------- */
+body { font-family: "Segoe UI", Arial, sans-serif; margin:0; padding:0; background:#f5f6fa; color:#222; }
+.container { max-width: 1000px; margin: 18px auto; padding: 12px; }
+.card { background:white; padding:18px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.06); margin-bottom:18px; }
+
+/* ---------- Header ---------- */
+.header-img { width:100%; max-width:600px; height:auto; margin:0 auto 8px; display:block; }
+.app-header { text-align:center; padding:18px 10px; background:#0b74de; color:white; border-bottom:4px solid rgba(0,0,0,0.04); }
+.app-header .title { font-size:20px; font-weight:700; }
+.app-header .subtitle { font-size:14px; opacity:0.95; margin-top:6px; }
+
+/* ---------- Form ---------- */
+label { display:block; margin-top:10px; font-weight:600; }
+input, select { width:100%; padding:10px; border-radius:6px; border:1px solid #ccc; margin-top:6px; font-size:15px; box-sizing:border-box; }
+button { background:#0b74de; color:white; padding:10px 14px; border:none; border-radius:8px; cursor:pointer; }
+.btn-sm { display:inline-block; background:#0b74de; color:white; padding:8px 12px; border-radius:6px; text-decoration:none; }
+
+/* ---------- Table ---------- */
+.table-wrapper { overflow-x:auto; margin-top:12px; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:10px 8px; border-bottom:1px solid #e9eef6; text-align:left; vertical-align:middle; }
+th { background:#eef6ff; font-weight:600; }
+.right { text-align:right; }
+
+/* ---------- Loading ---------- */
+#loading, #loadingLaporan { display:none; text-align:center; padding:10px; margin-top:8px; color:#0b74de; font-weight:700; }
+#loading b, #loadingLaporan b { animation: blink 1s infinite; }
+@keyframes blink { 0%{opacity:.2}50%{opacity:1}100%{opacity:.2} }
+
+/* ---------- Modal ---------- */
+.modal-backdrop { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.35); z-index:9999; }
+.modal-card { background:white; width:95%; max-width:480px; padding:16px; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.15); }
+
+/* ---------- Print / A4 ---------- */
+/* Only print laporan area */
+@media print {
+  @page { size: A4 portrait; margin:20mm; }
+  body * { visibility: hidden !important; }
+  #laporan, #laporan * { visibility: visible !important; }
+  #laporan { position: absolute; left:0; top:0; width:100%; }
+  table { page-break-inside:auto; }
+  tr { page-break-inside:avoid; page-break-after:auto; }
+  thead { display: table-header-group; } /* repeat table header */
+  tfoot { display: table-footer-group; }
 }
 
-  header {
-    background: #0b74de;
-    padding: 18px;
-    color: white;
-    text-align: center;
-    font-size: 22px;
-    font-weight: 600;
-  }
+/* make printed tables full width for A4 paper */
+@media print {
+  #laporan .table-wrapper { overflow:visible; }
+  #laporan table { width:100%; font-size:12px; }
+}
 
-  .container {
-    max-width: 900px;
-    margin: auto;
-    padding: 18px;
-  }
+/* ---------- Utilities ---------- */
+.btn-danger { background:#c0392b; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
+.small { font-size:13px; color:#666; }
+.center { text-align:center; }
 
-  .card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 22px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  }
+/* prevent table overflow printing */
+.table-wrapper { -webkit-overflow-scrolling: touch; }
 
-  .card h2 {
-    margin-top: 0;
-    font-size: 20px;
-    color: #0b74de;
-    margin-bottom: 12px;
-  }
+/* signature area */
+.sign-area { margin-top:36px; width:100%; display:flex; justify-content:space-between; gap:20px; }
+.sign-area .box { text-align:center; width:48%; }
 
-  label {
-    font-weight: 600;
-    margin-top: 12px;
-    display: block;
-  }
-
-  input, select {
-    padding: 10px;
-    width: 100%;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    margin-top: 4px;
-    font-size: 15px;
-  }
-
-  button {
-    background: #0b74de;
-    color: white;
-    padding: 12px 18px;
-    border: none;
-    border-radius: 8px;
-    margin-top: 14px;
-    cursor: pointer;
-    font-size: 15px;
-    width: 100%;
-  }
-
-  button:hover {
-    background: #095fb7;
-  }
-
-  .btn-sm {
-    display: inline-block;
-    background: #0b74de;
-    padding: 8px 14px;
-    border-radius: 6px;
-    color: white;
-    text-decoration: none;
-    font-size: 14px;
-    margin-top: 10px;
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 14px;
-  }
-
-  th, td {
-    padding: 10px;
-    border-bottom: 1px solid #e1e4ea;
-    text-align: left;
-  }
-
-  th {
-    background: #eaf2ff;
-    font-weight: 600;
-  }
-
-  .right {
-    text-align: right;
-  }
-
-  #msg {
-    margin-top: 8px;
-    font-weight: bold;
-    color: green;
-  }
-
-  /* Loading blink */
-  #loading b, #loadingLaporan b {
-    animation: blink 1s infinite;
-  }
-
-  @keyframes blink {
-    0% { opacity: 0.2; }
-    50% { opacity: 1; }
-    100% { opacity: 0.2; }
-  }
-
-  /* Modal */
-  .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    display: none; align-items: center; justify-content: center; z-index: 9999;
-  }
-  .modal-card {
-    background: white; padding: 18px; border-radius: 8px; width: 95%; max-width: 420px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-  }
-  .modal-card label { font-weight:600; margin-top:8px; display:block; }
-  .modal-card input, .modal-card select { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #ccc;}
-  .modal-actions { margin-top:12px; display:flex; gap:8px; }
-  .btn-cancel { background:#ccc; color:#111; padding:8px 10px; border-radius:6px; cursor:pointer; border:none; flex:1; }
-  .btn-save { background:#0b74de; color:white; padding:8px 10px; border-radius:6px; cursor:pointer; border:none; flex:1; }
+/* responsive tweaks */
+@media (max-width:600px){
+  .app-header .title { font-size:18px; }
+  .header-img { max-width:320px; }
+}
 </style>
-
 </head>
 <body>
 
-<header>
-  <img id="headerImage" class="header-img" src="">
-  <div style="font-size:22px; font-weight:600;">Aplikasi Buku Kas Umum</div>
-  <div id="headerSubyek" style="font-size:16px; margin-top:4px; opacity:0.9;"></div>
-</header>
-
+<!-- App Header (visible in UI, in print header included inside laporan content too) -->
+<div class="app-header">
+  <img id="headerImageTop" class="header-img" src="" alt="Header" />
+  <div class="title">Aplikasi Buku Kas Umum</div>
+  <div id="headerSubyekTop" class="subtitle"></div>
+</div>
 
 <div class="container">
 
-  <!-- ========================= FORM INPUT ========================= -->
+  <!-- Input card -->
   <div class="card">
-    <h2>Input Transaksi</h2>
-
+    <h3>Input Transaksi</h3>
     <form id="formKas">
       <label>Tanggal</label>
       <input type="date" name="tanggal" required>
@@ -180,85 +104,98 @@
       </select>
 
       <label>Nominal</label>
-      <input type="number" name="nominal" required>
+      <input type="text" name="nominal" placeholder="Masukkan angka tanpa titik" required>
 
       <button type="submit">Simpan Transaksi</button>
     </form>
 
-    <div id="loading" style="display:none; padding:10px; text-align:center;">
-      <b>Sedang memproses...</b>
-    </div>
-
-    <div id="msg"></div>
+    <div id="loading" class="small"><b>Sedang memproses...</b></div>
+    <div id="msg" class="small"></div>
   </div>
 
-  <!-- ========================= FILTER & LAPORAN ========================= -->
+  <!-- Filter & laporan card -->
   <div class="card">
-    <h2>Laporan Bulanan</h2>
+    <h3>Laporan Bulanan</h3>
 
-    <label>Pilih Bulan</label>
-    <select id="bulan"></select>
-
-    <label>Tanggal Laporan</label>
-    <input type="date" id="tanggalLaporan">
-
-    <button id="lihat">Tampilkan Laporan</button>
-    <a href="#" class="btn-sm" onclick="window.print()">Cetak / PDF</a>
-
-    <div id="loadingLaporan" style="display:none; padding:10px; text-align:center;">
-      <b>Memuat laporan...</b>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="flex:1; min-width:150px;">
+        <label>Pilih Bulan</label>
+        <select id="bulan"></select>
+      </div>
+      <div style="width:150px;">
+        <label>Pilih Tahun</label>
+        <select id="tahun"></select>
+      </div>
+      <div style="width:220px;">
+        <label>Tanggal Laporan (untuk cetak)</label>
+        <input type="date" id="tanggalLaporan">
+      </div>
+      <div style="min-width:140px; align-self:end;">
+        <button id="lihat">Tampilkan Laporan</button>
+      </div>
+      <div style="min-width:140px; align-self:end;">
+        <a class="btn-sm" id="cetakBtn" href="#" onclick="window.print()">Cetak / PDF</a>
+      </div>
     </div>
 
-    <div id="laporan"></div>
+    <div id="loadingLaporan" class="small"><b>Memuat laporan...</b></div>
+    <div id="laporan" style="margin-top:12px;"></div>
   </div>
 
 </div>
 
+<!-- Modal Edit -->
+<div id="modalEditBackdrop" class="modal-backdrop">
+  <div class="modal-card">
+    <h3>Edit Transaksi</h3>
+    <input type="hidden" id="edit_id">
+    <label>Tanggal</label>
+    <input type="date" id="edit_tanggal">
+    <label>Uraian</label>
+    <input type="text" id="edit_uraian">
+    <label>Jenis</label>
+    <select id="edit_jenis"><option>Penerimaan</option><option>Pengeluaran</option></select>
+    <label>Nominal</label>
+    <input type="text" id="edit_nominal">
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button class="btn-cancel" onclick="closeEditModal()">Batal</button>
+      <button class="btn-save" onclick="updateData()">Simpan</button>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ======================= KONFIGURASI URL ======================= */
+/* ================= Configuration - update these if your URLs change ================ */
 const APP_POST_URL = "https://script.google.com/macros/s/AKfycbw54wej60UYkvjTXfb7WNCLG-2LQEjM4KINEJCT8IDIUtGPKvZnTR5k2aUrTWbHWbG2/exec";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=0&single=true&output=csv";
 const CONFIG_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=747260588&single=true&output=csv";
 
-
-/* ======================= SIMPAN DATA ======================= */
-document.getElementById("formKas").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const form = new FormData(e.target);
-
-  document.getElementById("loading").style.display = "block";
-  document.getElementById("msg").innerHTML = "";
-
-  const res = await fetch(APP_POST_URL, { method: "POST", body: form });
-  document.getElementById("msg").innerHTML = await res.text();
-  document.getElementById("loading").style.display = "none";
-  e.target.reset();
-});
-
-
-/* ======================= CSV PARSER ======================= */
+/* ================= Utility: robust CSV parser (handles quotes & commas) ================ */
 function parseCSV(text){
   const rows = [];
-  let lines = text.split(/\r?\n/);
+  // Normalize line endings
+  let lines = text.replace(/\r\n/g, '\n').split('\n');
 
   let insideQuotes = false;
   let field = "";
   let row = [];
 
   for (let i = 0; i < lines.length; i++) {
-    let chars = [...lines[i]];
-
+    const line = lines[i];
+    const chars = [...line];
     for (let j = 0; j < chars.length; j++) {
-      let c = chars[j];
-
+      const c = chars[j];
       if (c === '"') {
-        // Toggle state kutip
+        // handle double quotes inside quoted string
+        const next = chars[j+1];
+        if (insideQuotes && next === '"') {
+          field += '"';
+          j++; // skip one
+          continue;
+        }
         insideQuotes = !insideQuotes;
         continue;
       }
-
-      // Jika koma DAN tidak sedang di dalam kutip → akhiri field
       if (c === ',' && !insideQuotes) {
         row.push(field);
         field = "";
@@ -266,314 +203,386 @@ function parseCSV(text){
         field += c;
       }
     }
-
-    // Akhiri row
+    // end line
     row.push(field);
     field = "";
-
-    // Jika baris selesai dan tidak dalam kutip → push row
+    // only push completed rows (not inside quotes)
     if (!insideQuotes) {
       rows.push(row);
       row = [];
+    } else {
+      // if inside quotes, append a newline to current field and continue (multiline cell)
+      field += '\n';
     }
   }
 
-  // Ambil header
-  const headers = rows.shift().map(h => h.trim());
+  // header
+  if (rows.length === 0) return [];
+  const header = rows.shift().map(h => h.trim());
 
-  // Buat list object
+  // map to objects
   return rows.map(r => {
-    let obj = {};
-    headers.forEach((h,i)=> obj[h] = (r[i] || "").trim());
+    const obj = {};
+    header.forEach((h, idx) => {
+      obj[h] = (r[idx] !== undefined) ? r[idx].trim() : "";
+    });
     return obj;
   });
 }
 
+/* ================= Helpers ================= */
 function monthName(n){
   const m=["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","Nopember","Desember"];
-  return m[n];
+  return m[n] || "";
 }
 
-async function loadConfig(){
-  const res = await fetch(CONFIG_URL,{cache:"no-store"});
-  const raw = parseCSV(await res.text());
-  let cfg={}; raw.forEach(r=> cfg[r.key]=r.value);
-  return cfg;
+// Robust numeric parser: remove non-digit except minus
+function toNumberNominal(s){
+  if(s === null || s === undefined) return 0;
+  // remove dots, spaces; replace comma decimals (if any) — assume integers
+  let cleaned = String(s).replace(/[^\d\-]/g, '');
+  if(cleaned === "") return 0;
+  return Number(cleaned);
 }
+
+/* ================= Config load & apply header ================= */
+async function loadConfig(){
+  try{
+    const res = await fetch(CONFIG_URL, { cache: 'no-store' });
+    const txt = await res.text();
+    const arr = parseCSV(txt);
+    const cfg = {};
+    arr.forEach(r => { if(r.key) cfg[r.key] = r.value; });
+    return cfg;
+  }catch(err){
+    console.error('loadConfig error', err);
+    return {};
+  }
+}
+
 async function applyHeaderConfig(){
   const cfg = await loadConfig();
-
-  // Set gambar header
-  document.getElementById("headerImage").src = cfg.header_url;
-
-  // Set nama subyek
-  document.getElementById("headerSubyek").innerText = cfg.subyek;
+  if(cfg.header_url) {
+    document.getElementById('headerImageTop').src = cfg.header_url;
+  }
+  if(cfg.subyek) {
+    document.getElementById('headerSubyekTop').innerText = cfg.subyek;
+  }
 }
 
-/* ======================= LOAD & RENDER LAPORAN ======================= */
-async function loadAndRender(month){
+/* ================= Load all transactions ================= */
+async function loadAllTransactions(){
+  const res = await fetch(CSV_URL, { cache: 'no-store' });
+  const txt = await res.text();
+  const arr = parseCSV(txt);
+  // Normalize objects to expected fields
+  return arr.map(r => {
+    // Common column names expected: id,tanggal,uraian,jenis,nominal,bulan,tahun,created_at,modified_at
+    // but be flexible: find keys case-insensitively
+    const keys = Object.keys(r);
+    const mapKey = (k) => keys.find(x=> x.toLowerCase()===k) || k;
+    const idk = mapKey('id');
+    const tanggalk = mapKey('tanggal');
+    const uraiank = mapKey('uraian');
+    const jenisk = mapKey('jenis');
+    const nominalk = mapKey('nominal');
+    const bulank = mapKey('bulan');
+    const tahunk = mapKey('tahun');
 
-  document.getElementById("loadingLaporan").style.display = "block";
+    const tanggal = r[tanggalk] || "";
+    const t = new Date(tanggal);
+    // if bulan/tahun missing, try parse from tanggal
+    let bulan = parseInt(r[bulank]) || (isNaN(t.getMonth())?0: t.getMonth()+1);
+    let tahun = parseInt(r[tahunk]) || (isNaN(t.getFullYear())? new Date().getFullYear(): t.getFullYear());
 
-  const cfg = await loadConfig();
-  const tanggalDipilih = document.getElementById("tanggalLaporan").value;
+    let nominal = toNumberNominal(r[nominalk]);
 
-  let tanggalFormatted = "";
-  if(tanggalDipilih){
-    let t = new Date(tanggalDipilih);
-    tanggalFormatted = t.toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
-  }
+    let id = r[idk] ? (isNaN(Number(r[idk])) ? r[idk] : Number(r[idk])) : null;
 
-  const raw = parseCSV(await (await fetch(CSV_URL,{cache:"no-store"})).text());
-
-  let tx = raw.map(r => ({
-    id:Number(r.id),
-    tanggal:r.tanggal,
-    uraian:r.uraian,
-    jenis:r.jenis,
-    nominal:Number(r.nominal),
-    bulan:Number(r.bulan),
-    tahun:Number(r.tahun)
-  })).filter(t => t.bulan == month);
-
-  const rawPrev = parseCSV(await (await fetch(CSV_URL,{cache:"no-store"})).text());
-  let prev = rawPrev.filter(r=> Number(r.bulan)==(month-1));
-
-  let saldoAwal=0;
-  prev.forEach(p=>{
-    if(p.jenis=="Penerimaan") saldoAwal+=Number(p.nominal);
-    if(p.jenis=="Pengeluaran") saldoAwal-=Number(p.nominal);
+    return {
+      raw: r,
+      id,
+      tanggal,
+      uraian: r[uraiank] || "",
+      jenis: r[jenisk] || "",
+      nominal,
+      bulan,
+      tahun
+    };
   });
+}
 
-  let totalIn=0,totalOut=0;
-  let saldo = saldoAwal;
+/* ================= Calculate running/initial balance ================= */
+function hitungSaldoAwalSemua(semuaData, targetMonth, targetYear){
+  // sum semua transaksi dengan (tahun < targetYear) OR (tahun == targetYear and bulan < targetMonth)
+  let saldo = 0;
+  semuaData.forEach(r => {
+    if( (r.tahun < targetYear) || (r.tahun === targetYear && r.bulan < targetMonth) ){
+      if(r.jenis === "Penerimaan") saldo += Number(r.nominal);
+      if(r.jenis === "Pengeluaran") saldo -= Number(r.nominal);
+    }
+  });
+  return saldo;
+}
 
-  /* ===== HEADER LAPORAN ===== */
-  let html = `
-    <div style="text-align:center;">
-      <img src="${cfg.header_url}" style="max-width:600px;width:100%;">
-    </div>
+/* ================= Render laporan ================= */
+async function loadAndRender(month, year){
+  try{
+    document.getElementById('loadingLaporan').style.display = 'block';
+    const cfg = await loadConfig();
+    const tanggalDipilih = document.getElementById('tanggalLaporan').value;
+    let tanggalFormatted = "";
+    if(tanggalDipilih){
+      const d = new Date(tanggalDipilih);
+      tanggalFormatted = d.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+    } else {
+      tanggalFormatted = new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+    }
 
-    <h2 style="text-align:center;margin:5px 0;">
-      Buku Kas Umum<br>${cfg.subyek}
-    </h2>
+    const semua = await loadAllTransactions();
 
-    <br>
+    // initial saldo (akumulatif lintas tahun)
+    const saldoAwal = hitungSaldoAwalSemua(semua, month, year);
 
-    <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>No</th>
-          <th>Tgl</th>
-          <th>Uraian</th>
-          <th class="right">Penerimaan</th>
-          <th class="right">Pengeluaran</th>
-          <th class="right">Saldo</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+    // filter transaksi untuk bulan/year
+    const tx = semua.filter(r => Number(r.bulan) === Number(month) && Number(r.tahun) === Number(year));
 
-  /* ===== SALDO AWAL ===== */
-  html += `
-    <tr style="font-weight:bold;background:#f6f7f9;">
-      <td>1</td>
-      <td></td>
-      <td>Saldo Awal Bulan</td>
-      <td></td>
-      <td></td>
-      <td class="right">${saldo.toLocaleString()}</td>
-      <td></td>
-    </tr>
-  `;
+    // build html
+    let html = '';
+    // include a header inside laporan (for print)
+    html += `<div style="text-align:center;">`;
+    if(cfg.header_url) html += `<img src="${cfg.header_url}" style="max-width:720px;width:100%;height:auto;margin-bottom:6px;">`;
+    html += `</div>`;
 
-  /* ===== SIMPAN TRANSAKSI UNTUK CRUD ===== */
-  window.currentTransactions = tx;
+    html += `<h2 style="text-align:center;margin:6px 0;">Buku Kas Umum<br>${cfg.subyek || ''}</h2>`;
 
-  /* ===== TRANSAKSI ===== */
-  tx.forEach((t,i)=>{
-    let masuk = t.jenis=="Penerimaan"? t.nominal : 0;
-    let keluar = t.jenis=="Pengeluaran"? t.nominal : 0;
+    html += `<div style="text-align:right;font-size:13px;margin-bottom:8px;">${cfg.lokasi || ''}, ${tanggalFormatted}</div>`;
 
-    saldo += masuk - keluar;
-    totalIn += masuk;
-    totalOut += keluar;
+    html += `<div class="table-wrapper"><table><thead><tr>
+      <th style="width:48px">No</th>
+      <th style="width:110px">Tgl</th>
+      <th>Uraian</th>
+      <th class="right">Penerimaan</th>
+      <th class="right">Pengeluaran</th>
+      <th class="right">Saldo</th>
+      <th style="width:140px">Aksi</th>
+    </tr></thead><tbody>`;
 
-    html += `
-      <tr>
-        <td>${i+2}</td>
+    // saldo awal row
+    let saldo = Number(saldoAwal);
+    html += `<tr style="font-weight:700;background:#f6f7f9;">
+      <td>1</td><td></td><td>Saldo Awal Bulan</td><td></td><td></td>
+      <td class="right">${saldo.toLocaleString()}</td><td></td></tr>`;
+
+    // store transactions to global so edit works
+    window.currentTransactions = tx.slice(); // shallow
+
+    // sort tx by tanggal so display chronological
+    tx.sort((a,b) => {
+      const da = new Date(a.tanggal), db = new Date(b.tanggal);
+      return da - db;
+    });
+
+    let counter = 2;
+    let totalIn = 0, totalOut = 0;
+    tx.forEach(t => {
+      const masuk = (t.jenis === "Penerimaan") ? Number(t.nominal) : 0;
+      const keluar = (t.jenis === "Pengeluaran") ? Number(t.nominal) : 0;
+      totalIn += masuk; totalOut += keluar;
+      saldo += masuk - keluar;
+
+      html += `<tr>
+        <td>${counter++}</td>
         <td>${t.tanggal}</td>
-        <td>${t.uraian}</td>
-        <td class="right">${masuk? masuk.toLocaleString():""}</td>
-        <td class="right">${keluar? keluar.toLocaleString():""}</td>
+        <td>${escapeHtml(t.uraian)}</td>
+        <td class="right">${masuk? masuk.toLocaleString() : ''}</td>
+        <td class="right">${keluar? keluar.toLocaleString() : ''}</td>
         <td class="right">${saldo.toLocaleString()}</td>
         <td>
-          <button onclick="editTransaksi(${t.id})" style="padding:5px 10px;border-radius:6px;margin-right:4px;">Edit</button>
-          <button onclick="hapusTransaksi(${t.id})" style="padding:5px 10px;border-radius:6px;background:#c0392b;color:white;border:none;">Hapus</button>
+          <button onclick="editTransaksi('${t.id}')" style="padding:6px;border-radius:6px;margin-right:6px;">Edit</button>
+          <button onclick="hapusTransaksi('${t.id}')" class="btn-danger">Hapus</button>
         </td>
-      </tr>
-    `;
-  });
+      </tr>`;
+    });
 
+    // footer totals
+    html += `</tbody><tfoot><tr style="font-weight:700;background:#eaf2ff;">
+      <td colspan="3" class="right">Jumlah</td>
+      <td class="right">${totalIn.toLocaleString()}</td>
+      <td class="right">${totalOut.toLocaleString()}</td>
+      <td class="right">${saldo.toLocaleString()}</td>
+      <td></td>
+    </tr></tfoot></table></div>`;
 
-  /* ===== FOOTER ===== */
-  html += `
-      </tbody>
-      <tfoot>
-        <tr style="font-weight:bold;background:#eaf2ff;">
-          <td colspan="3" class="right">Jumlah</td>
-          <td class="right">${totalIn.toLocaleString()}</td>
-          <td class="right">${totalOut.toLocaleString()}</td>
-          <td class="right">${saldo.toLocaleString()}</td>
-          <td></td>
-        </tr>
-      </tfoot>
-    </table>
-    </div>
+    // signatures
+    html += `<div class="sign-area">
+      <div class="box">Ketua<br><br><br><b>${cfg.ketua || ''}</b></div>
+      <div class="box">Bendahara<br><br><br><b>${cfg.bendahara || ''}</b></div>
+    </div>`;
 
-    <br><br><br>
-
-    <div style="text-align:right;margin-bottom:40px;">
-        ${cfg.lokasi}, ${tanggalFormatted}
-    </div>
-
-    <table style="width:100%;">
-      <tr>
-        <td style="text-align:center;">
-            Ketua,<br><br><br>
-            <b>${cfg.ketua}</b>
-        </td>
-        <td style="text-align:center;">
-            Bendahara,<br><br><br>
-            <b>${cfg.bendahara}</b>
-        </td>
-      </tr>
-    </table>
-  `;
-
-  document.getElementById("laporan").innerHTML = html;
-  document.getElementById("loadingLaporan").style.display = "none";
+    document.getElementById('laporan').innerHTML = html;
+    document.getElementById('loadingLaporan').style.display = 'none';
+  }catch(err){
+    console.error(err);
+    document.getElementById('laporan').innerHTML = '<div class="small">Gagal memuat laporan. Cek koneksi atau format CSV.</div>';
+    document.getElementById('loadingLaporan').style.display = 'none';
+  }
 }
 
+/* ================= Escape HTML for safety in uraian ================= */
+function escapeHtml(s){
+  if(!s) return '';
+  return s.replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
+}
 
-/* ======================= EDIT ======================= */
+/* ================= CRUD: Edit & Update ================= */
 function editTransaksi(id){
-  const t = window.currentTransactions.find(x=> Number(x.id)==Number(id));
-  if(!t){ alert("Data tidak ditemukan"); return; }
-
-  document.getElementById("edit_id").value = t.id;
-  document.getElementById("edit_tanggal").value = t.tanggal;
-  document.getElementById("edit_uraian").value = t.uraian;
-  document.getElementById("edit_jenis").value = t.jenis;
-  document.getElementById("edit_nominal").value = t.nominal;
-
-  document.getElementById("modalEditBackdrop").style.display = "flex";
+  // find in window.currentTransactions
+  const t = (window.currentTransactions||[]).find(x => String(x.id) === String(id));
+  if(!t) { alert('Transaksi tidak ditemukan (mungkin sudah dihapus).'); return; }
+  document.getElementById('edit_id').value = t.id;
+  document.getElementById('edit_tanggal').value = t.tanggal;
+  document.getElementById('edit_uraian').value = t.uraian;
+  document.getElementById('edit_jenis').value = t.jenis;
+  document.getElementById('edit_nominal').value = t.nominal;
+  document.getElementById('modalEditBackdrop').style.display = 'flex';
 }
-
-function closeEditModal(){
-  document.getElementById("modalEditBackdrop").style.display = "none";
-}
+function closeEditModal(){ document.getElementById('modalEditBackdrop').style.display = 'none'; }
 
 async function updateData(){
-  const id = document.getElementById("edit_id").value;
+  const id = document.getElementById('edit_id').value;
+  const tanggal = document.getElementById('edit_tanggal').value;
+  const uraian = document.getElementById('edit_uraian').value;
+  const jenis = document.getElementById('edit_jenis').value;
+  const nominal = document.getElementById('edit_nominal').value;
+
+  if(!tanggal || !uraian || !jenis){ alert('Lengkapi data.'); return; }
+
   const fd = new FormData();
+  fd.append('action','update');
+  fd.append('id', id);
+  fd.append('tanggal', tanggal);
+  fd.append('uraian', uraian);
+  fd.append('jenis', jenis);
+  fd.append('nominal', toNumberNominal(nominal));
 
-  fd.append("action","update");
-  fd.append("id", id);
-  fd.append("tanggal", document.getElementById("edit_tanggal").value);
-  fd.append("uraian", document.getElementById("edit_uraian").value);
-  fd.append("jenis", document.getElementById("edit_jenis").value);
-  fd.append("nominal", document.getElementById("edit_nominal").value);
-
-  const res = await fetch(APP_POST_URL,{method:"POST",body:fd});
-  const js = await res.json();
-
-  if(js.status=="success"){
-    closeEditModal();
-    const m = Number(document.getElementById("bulan").value);
-    await loadAndRender(m);
-    alert("Perubahan disimpan.");
-  } else {
-    alert("Gagal update: "+js.message);
+  try{
+    document.getElementById('loading').style.display = 'block';
+    const res = await fetch(APP_POST_URL, { method:'POST', body: fd });
+    const js = await res.json();
+    document.getElementById('loading').style.display = 'none';
+    if(js.status === 'success'){
+      closeEditModal();
+      // refresh current month/year
+      const m = Number(document.getElementById('bulan').value);
+      const y = Number(document.getElementById('tahun').value);
+      await loadAndRender(m,y);
+      alert('Data berhasil diupdate.');
+    } else {
+      alert('Gagal update: '+(js.message||'unknown'));
+    }
+  }catch(err){
+    document.getElementById('loading').style.display = 'none';
+    alert('Terjadi error saat update: '+err);
   }
 }
 
-
-/* ======================= DELETE ======================= */
+/* ================= DELETE ================= */
 async function hapusTransaksi(id){
-  let alasan = prompt("Alasan penghapusan?");
-  if(alasan === null) return;
-
+  const alasan = prompt('Masukkan alasan penghapusan (opsional):');
+  if(alasan === null) return; // cancel
   const fd = new FormData();
-  fd.append("action","delete");
-  fd.append("id", id);
-  fd.append("alasan", alasan);
-
-  const res = await fetch(APP_POST_URL,{method:"POST",body:fd});
-  const js = await res.json();
-
-  if(js.status=="success"){
-    const m = Number(document.getElementById("bulan").value);
-    await loadAndRender(m);
-    alert("Transaksi dihapus.");
-  } else {
-    alert("Gagal hapus: "+js.message);
+  fd.append('action','delete');
+  fd.append('id', id);
+  fd.append('alasan', alasan || '');
+  try{
+    document.getElementById('loading').style.display = 'block';
+    const res = await fetch(APP_POST_URL, { method:'POST', body: fd });
+    const js = await res.json();
+    document.getElementById('loading').style.display = 'none';
+    if(js.status === 'success'){
+      const m = Number(document.getElementById('bulan').value);
+      const y = Number(document.getElementById('tahun').value);
+      await loadAndRender(m,y);
+      alert('Data dihapus.');
+    } else {
+      alert('Gagal hapus: '+(js.message||'unknown'));
+    }
+  }catch(err){
+    document.getElementById('loading').style.display = 'none';
+    alert('Terjadi error saat menghapus: '+err);
   }
 }
 
-
-/* ======================= DROPDOWN & TOMBOL ======================= */
+/* ================= Init dropdowns & events ================= */
 function initMonthDropdown(){
-  const sel = document.getElementById("bulan");
+  const sel = document.getElementById('bulan');
+  sel.innerHTML = '';
   for(let i=1;i<=12;i++){
-    const o=document.createElement("option");
-    o.value=i; o.textContent=monthName(i);
+    const o = document.createElement('option'); o.value = i; o.textContent = monthName(i);
     sel.appendChild(o);
   }
+  // default to current month
+  sel.value = new Date().getMonth()+1;
 }
-initMonthDropdown();
-applyHeaderConfig();
+function initYearDropdown(){
+  const sel = document.getElementById('tahun');
+  sel.innerHTML = '';
+  const thisYear = new Date().getFullYear();
+  // show a range: thisYear-2 ... thisYear+1
+  for(let y=thisYear-2;y<=thisYear+1;y++){
+    const o = document.createElement('option'); o.value = y; o.textContent = y;
+    sel.appendChild(o);
+  }
+  sel.value = thisYear;
+}
 
-
-document.getElementById("lihat").addEventListener("click", async()=>{
-  const m = Number(document.getElementById("bulan").value);
-  document.getElementById("laporan").innerHTML="";
-  document.getElementById("loadingLaporan").style.display="block";
-  await loadAndRender(m);
+document.getElementById('formKas').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  // ensure nominal cleaned
+  const rawNominal = fd.get('nominal') || '';
+  fd.set('nominal', toNumberNominal(rawNominal));
+  try{
+    document.getElementById('loading').style.display = 'block';
+    const res = await fetch(APP_POST_URL, { method:'POST', body: fd });
+    const text = await res.text();
+    document.getElementById('msg').innerHTML = text;
+    document.getElementById('loading').style.display = 'none';
+    e.target.reset();
+    // optional: reload current report
+    const m = Number(document.getElementById('bulan').value);
+    const y = Number(document.getElementById('tahun').value);
+    await loadAndRender(m,y);
+  }catch(err){
+    document.getElementById('loading').style.display = 'none';
+    alert('Gagal simpan: '+err);
+  }
 });
+
+document.getElementById('lihat').addEventListener('click', async function(){
+  const m = Number(document.getElementById('bulan').value);
+  const y = Number(document.getElementById('tahun').value);
+  document.getElementById('laporan').innerHTML = '';
+  document.getElementById('loadingLaporan').style.display = 'block';
+  await loadAndRender(m,y);
+});
+
+/* ================= small helpers ================= */
+function pad(n){ return n<10? '0'+n : n; }
+
+/* ================= Boot sequence ================= */
+initMonthDropdown();
+initYearDropdown();
+applyHeaderConfig();
+// optionally render current month by default
+(async ()=> {
+  const m = Number(document.getElementById('bulan').value);
+  const y = Number(document.getElementById('tahun').value);
+  await loadAndRender(m,y);
+})();
+
+/* ================= Final notes ================= */
 </script>
-
-
-<!-- ======================= MODAL EDIT ======================= -->
-<div id="modalEditBackdrop" class="modal-backdrop">
-  <div class="modal-card">
-    <h3>Edit Transaksi</h3>
-
-    <input type="hidden" id="edit_id">
-
-    <label>Tanggal</label>
-    <input type="date" id="edit_tanggal">
-
-    <label>Uraian</label>
-    <input type="text" id="edit_uraian">
-
-    <label>Jenis</label>
-    <select id="edit_jenis">
-      <option value="Penerimaan">Penerimaan</option>
-      <option value="Pengeluaran">Pengeluaran</option>
-    </select>
-
-    <label>Nominal</label>
-    <input type="number" id="edit_nominal">
-
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeEditModal()">Batal</button>
-      <button class="btn-save" onclick="updateData()">Simpan</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
