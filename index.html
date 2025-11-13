@@ -94,35 +94,69 @@ th { background:#eef6ff; font-weight:600; }
   background: #085ab4;
 }
 
-/* ========================= CETAK TANPA HEADER/FOOTER BROWSER ========================= */
+/* ========================= PRINT CLEAN & FINAL ========================= */
+
+/* Hilangkan header/footer browser */
 @page {
-  margin: 10mm !important;
+  size: A4 portrait;
+  margin: 12mm !important;
 }
 
-/* Hilangkan header/footer default Chrome saat print */
+/* Atur warna tetap tercetak */
 @media print {
   body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* SEMUA ELEMEN disembunyikan... */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* ...kecuali area laporan */
+  #laporan, 
+  #laporan * {
+    visibility: visible !important;
+  }
+
+  /* Posisikan area laporan menjadi halaman cetak */
+  #laporan {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  /* Tabel rapi untuk multi-page */
+  table {
+    page-break-inside: auto;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tfoot {
+    display: table-footer-group;
+  }
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* Perkecil tabel sedikit untuk A4 */
+  #laporan table {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  /* Hilangkan tombol Edit & Hapus */
+  .no-print,
+  th:nth-child(7),
+  td:nth-child(7) {
+    display: none !important;
+    visibility: hidden !important;
   }
 }
 
-/* ---------- Print / A4 ---------- */
-@media print {
-  @page { size: A4 portrait; margin:20mm; }
-  body * { visibility: hidden !important; }
-  #laporan, #laporan * { visibility: visible !important; }
-  #laporan { position: absolute; left:0; top:0; width:100%; }
-  table { page-break-inside:auto; }
-  tr { page-break-inside:avoid; page-break-after:auto; }
-  thead { display: table-header-group; }
-  tfoot { display: table-footer-group; }
-}
-
-@media print {
-  #laporan .table-wrapper { overflow:visible; }
-  #laporan table { width:100%; font-size:12px; }
-}
 
 /* ---------- Others ---------- */
 .btn-danger { background:#c0392b; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
