@@ -450,7 +450,13 @@ async function loadRentang(dari, sampai, year){
   const cfg = await loadConfig();
   const semua = await loadAllTransactions();
 
-  // Filter data sesuai tahun & rentang bulan
+  // Tanggal laporan (dari input yang sama)
+  const tgl = document.getElementById('tanggalLaporan').value;
+  const tanggalLaporan = tgl
+    ? new Date(tgl).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})
+    : new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+
+  // Filter rentang bulan
   let tx = semua.filter(r =>
     Number(r.tahun) === Number(year) &&
     Number(r.bulan) >= Number(dari) &&
@@ -460,7 +466,7 @@ async function loadRentang(dari, sampai, year){
   // Sort tanggal
   tx.sort((a,b)=> new Date(a.tanggal) - new Date(b.tanggal));
 
-  // SALDO AWAL = bulan sebelum "dari"
+  // Saldo awal = semua sebelum "dari"
   const saldoAwal = hitungSaldoAwalSemua(semua, dari, year);
 
   let saldo = saldoAwal;
@@ -468,63 +474,128 @@ async function loadRentang(dari, sampai, year){
 
   let html = "";
 
-  if(cfg.header_url)
-    html += `<div style="text-align:center;margin-bottom:6px;"><img src="${cfg.header_url}"
-              style="max-width:720px;width:100%;height:auto;"></div>`;
+  // HEADER GAMBAR
+  if(cfg.header_url){
+    html += `
+      <div style="text-align:center;margin-bottom:6px;">
+        <img src="${cfg.header_url}" style="max-width:720px;width:100%;height:auto;">
+      </div>`;
+  }
 
-  html += `<h2 style="text-align:center;margin:6px 0;">Buku Kas Umum<br>${cfg.subyek}</h2>`;
-  html += `<div style="text-align:center;font-weight:600;margin-bottom:8px;">
-             Laporan Rentang Bulan: ${monthName(dari)} – ${monthName(sampai)} ${year}
-           </div>`;
+  // JUDUL
+  html += `
+    <h2 style="text-align:center;margin:6px 0;">
+      Buku Kas Umum<br>${cleanQuotes(cfg.subyek || "")}
+    </h2>
 
-  html += `<div class="table-wrapper"><table><thead><tr>
-    <th>No</th><th>Tanggal</th><th>Uraian</th>
-    <th class="right">Penerimaan</th>
-    <th class="right">Pengeluaran</th>
-    <th class="right">Saldo</th>
-    <th class="no-print">Aksi</th>
-  </tr></thead><tbody>`;
+    <div style="text-align:center;font-weight:600;margin-bottom:8px;">
+      Laporan Rentang Bulan – ${monthName(dari)} s/d ${monthName(sampai)} ${year}
+    </div>
 
-  html += `<tr style="font-weight:700;background:#f6f7f9;">
-    <td>1</td><td></td><td>Saldo Awal</td><td></td><td></td>
-    <td class="right">${saldo.toLocaleString()}</td><td class="no-print"></td>
-  </tr>`;
+    <div style="text-align:center;margin-bottom:12px;">
+      Tanggal Laporan: ${tanggalLaporan}
+    </div>
+  `;
+
+  // TABEL
+  html += `
+    <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:48px">No</th>
+          <th style="width:110px">Tanggal</th>
+          <th style="width:100px">Bulan</th>
+          <th>Uraian</th>
+          <th class="right">Penerimaan</th>
+          <th class="right">Pengeluaran</th>
+          <th class="right">Saldo</th>
+          <th class="no-print">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  // SALDO AWAL
+  html += `
+      <tr style="font-weight:700;background:#f6f7f9;">
+        <td>1</td>
+        <td></td>
+        <td>${monthName(dari)}</td>
+        <td>Saldo Awal</td>
+        <td></td>
+        <td></td>
+        <td class="right">${saldo.toLocaleString()}</td>
+        <td class="no-print"></td>
+      </tr>
+  `;
+
+  window.currentTransactions = tx.slice();
 
   let no = 2;
 
   tx.forEach(t=>{
-    const masuk  = t.jenis === "Penerimaan" ? t.nominal : 0;
+    const masuk = t.jenis === "Penerimaan" ? t.nominal : 0;
     const keluar = t.jenis === "Pengeluaran" ? t.nominal : 0;
 
     saldo += masuk - keluar;
     totalIn += masuk;
     totalOut += keluar;
 
-    html += `<tr>
-      <td>${no++}</td>
-      <td>${t.tanggal}</td>
-      <td>${escapeHtml(t.uraian)}</td>
-      <td class="right">${masuk? masuk.toLocaleString() : ""}</td>
-      <td class="right">${keluar? keluar.toLocaleString() : ""}</td>
-      <td class="right">${saldo.toLocaleString()}</td>
-      <td class="no-print">
+    let aksi = "";
+    if(t.bulan === dari){
+      aksi = `
         <button class="btn-edit" onclick="editTransaksi('${t.id}')">Edit</button>
         <button class="btn-danger" onclick="hapusTransaksi('${t.id}')">Hapus</button>
-      </td>
-    </tr>`;
+      `;
+    }
+
+    html += `
+      <tr>
+        <td>${no++}</td>
+        <td>${t.tanggal}</td>
+        <td>${monthName(t.bulan)}</td>
+        <td>${escapeHtml(t.uraian)}</td>
+        <td class="right">${masuk ? masuk.toLocaleString() : ""}</td>
+        <td class="right">${keluar ? keluar.toLocaleString() : ""}</td>
+        <td class="right">${saldo.toLocaleString()}</td>
+        <td class="no-print">${aksi}</td>
+      </tr>
+    `;
   });
 
-  html += `</tbody><tfoot><tr style="font-weight:700;background:#eaf2ff;">
-    <td colspan="3" class="right">Jumlah</td>
-    <td class="right">${totalIn.toLocaleString()}</td>
-    <td class="right">${totalOut.toLocaleString()}</td>
-    <td class="right">${saldo.toLocaleString()}</td>
-    <td class="no-print"></td>
-  </tr></tfoot></table></div>`;
+  // FOOTER TOTAL
+  html += `
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:700;background:#eaf2ff;">
+          <td colspan="4" class="right">Total</td>
+          <td class="right">${totalIn.toLocaleString()}</td>
+          <td class="right">${totalOut.toLocaleString()}</td>
+          <td class="right">${saldo.toLocaleString()}</td>
+          <td class="no-print"></td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+  `;
+
+  // LOKASI & TTD
+  html += `
+    <div style="text-align:right;margin-top:18px;margin-bottom:6px;">
+      ${cleanQuotes(cfg.lokasi || "")}, ${tanggalLaporan}
+    </div>
+
+    <div class="sign-area">
+      <div class="box">Ketua<br><br><br><b>${cleanQuotes(cfg.ketua || "")}</b></div>
+      <div class="box">Bendahara<br><br><br><b>${cleanQuotes(cfg.bendahara || "")}</b></div>
+    </div>
+  `;
 
   document.getElementById('laporan').innerHTML = html;
   document.getElementById('loadingLaporan').style.display = 'none';
 }
+
 /* ========== render laporan rentang bulan ========== */
 async function loadAndRenderRange(dariBulan, sampaiBulan, tahun) {
   try {
