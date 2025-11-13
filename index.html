@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Input & Laporan Kas</title>
+
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;margin:20px}
+  h1{margin-bottom:10px}
+  h2{margin-top:28px}
+  label{font-weight:bold}
+  input,select{
+    padding:6px;margin:4px 0;width:100%;max-width:300px;
+    border:1px solid #ccc;border-radius:4px;
+  }
+  button{
+    padding:8px 14px;background:#0b74de;color:#fff;
+    border:none;border-radius:5px;cursor:pointer
+  }
+  button:hover{background:#0a5fc2}
+  table{width:100%;border-collapse:collapse;margin-top:20px}
+  th,td{border:1px solid #ddd;padding:8px}
+  th{background:#f0f0f0}
+  .right{text-align:right}
+  .btn{
+    padding:8px 14px;border-radius:6px;background:#0b74de;
+    color:#fff;text-decoration:none;margin-right:6px
+  }
+  .msg{margin-top:10px;font-weight:bold}
+</style>
+</head>
+<body>
+
+<h1>Input Buku Kas</h1>
+
+<!-- ========================= FORM INPUT ========================= -->
+<h2>Input Transaksi</h2>
+<form id="formKas">
+  <label>Tanggal</label>
+  <input type="date" name="tanggal" required>
+
+  <label>Uraian</label>
+  <input type="text" name="uraian" placeholder="Contoh: Persembahan Minggu" required>
+
+  <label>Jenis</label>
+  <select name="jenis" required>
+    <option value="Penerimaan">Penerimaan</option>
+    <option value="Pengeluaran">Pengeluaran</option>
+  </select>
+
+  <label>Nominal</label>
+  <input type="number" name="nominal" placeholder="Contoh: 500000" required>
+
+  <button type="submit">Simpan Transaksi</button>
+</form>
+
+<div id="msg" class="msg"></div>
+
+<hr>
+
+<!-- ========================= FILTER LAPORAN ========================= -->
+<h2>Laporan Bulanan</h2>
+
+<label>Pilih Bulan</label>
+<select id="bulan"></select>
+
+<button id="lihat">Tampilkan</button>
+<a href="#" class="btn" onclick="window.print()">Cetak / PDF</a>
+
+<div id="laporan"></div>
+
+
+<script>
+// =================== CONFIG ======================
+const APP_POST_URL = "https://script.google.com/macros/s/AKfycbw54wej60UYkvjTXfb7WNCLG-2LQEjM4KINEJCT8IDIUtGPKvZnTR5k2aUrTWbHWbG2/exec";
+
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=0&single=true&output=csv";
+
+
+// =================== FORM INPUT (POST) ======================
+document.getElementById("formKas").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const form = new FormData(e.target);
+
+  const res = await fetch(APP_POST_URL, {
+    method: "POST",
+    body: form
+  });
+
+  const text = await res.text();
+  document.getElementById("msg").innerHTML = text;
+
+  e.target.reset();
+});
+
+
+// =================== CSV PARSER ======================
+function parseCSV(text){
+  const lines = text.trim().split(/\r?\n/);
+  const header = lines[0].split(",");
+  const rows = [];
+
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim()) continue;
+    const cols = lines[i].split(",");
+    const obj = {
