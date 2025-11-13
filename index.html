@@ -116,16 +116,31 @@
     color: green;
   }
 
-  /* Loading Animasi */
+  /* Loading blink */
   #loading b, #loadingLaporan b {
     animation: blink 1s infinite;
   }
+
   @keyframes blink {
     0% { opacity: 0.2; }
     50% { opacity: 1; }
     100% { opacity: 0.2; }
   }
 
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: none; align-items: center; justify-content: center; z-index: 9999;
+  }
+  .modal-card {
+    background: white; padding: 18px; border-radius: 8px; width: 95%; max-width: 420px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  }
+  .modal-card label { font-weight:600; margin-top:8px; display:block; }
+  .modal-card input, .modal-card select { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #ccc;}
+  .modal-actions { margin-top:12px; display:flex; gap:8px; }
+  .btn-cancel { background:#ccc; color:#111; padding:8px 10px; border-radius:6px; cursor:pointer; border:none; flex:1; }
+  .btn-save { background:#0b74de; color:white; padding:8px 10px; border-radius:6px; cursor:pointer; border:none; flex:1; }
 </style>
 
 </head>
@@ -160,7 +175,7 @@
       <button type="submit">Simpan Transaksi</button>
     </form>
 
-    <div id="loading" style="display:none; padding:10px; margin-top:10px; text-align:center;">
+    <div id="loading" style="display:none; padding:10px; text-align:center;">
       <b>Sedang memproses...</b>
     </div>
 
@@ -189,11 +204,15 @@
 
 </div>
 
+
 <script>
+/* ======================= KONFIGURASI URL ======================= */
 const APP_POST_URL = "https://script.google.com/macros/s/AKfycbw54wej60UYkvjTXfb7WNCLG-2LQEjM4KINEJCT8IDIUtGPKvZnTR5k2aUrTWbHWbG2/exec";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=0&single=true&output=csv";
 const CONFIG_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=747260588&single=true&output=csv";
 
+
+/* ======================= SIMPAN DATA ======================= */
 document.getElementById("formKas").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = new FormData(e.target);
@@ -202,14 +221,13 @@ document.getElementById("formKas").addEventListener("submit", async (e) => {
   document.getElementById("msg").innerHTML = "";
 
   const res = await fetch(APP_POST_URL, { method: "POST", body: form });
-  const text = await res.text();
-
+  document.getElementById("msg").innerHTML = await res.text();
   document.getElementById("loading").style.display = "none";
-  document.getElementById("msg").innerHTML = text;
-
   e.target.reset();
 });
 
+
+/* ======================= CSV PARSER ======================= */
 function parseCSV(text){
   const lines = text.trim().split(/\r?\n/);
   const header = lines[0].split(",");
@@ -229,13 +247,14 @@ function monthName(n){
 }
 
 async function loadConfig(){
-  const res = await fetch(CONFIG_URL, {cache:"no-store"});
+  const res = await fetch(CONFIG_URL,{cache:"no-store"});
   const raw = parseCSV(await res.text());
-  let cfg = {};
-  raw.forEach(r => { cfg[r.key] = r.value; });
+  let cfg={}; raw.forEach(r=> cfg[r.key]=r.value);
   return cfg;
 }
 
+
+/* ======================= LOAD & RENDER LAPORAN ======================= */
 async function loadAndRender(month){
 
   document.getElementById("loadingLaporan").style.display = "block";
@@ -246,40 +265,41 @@ async function loadAndRender(month){
   let tanggalFormatted = "";
   if(tanggalDipilih){
     let t = new Date(tanggalDipilih);
-    tanggalFormatted = t.toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" });
+    tanggalFormatted = t.toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"});
   }
 
-  const raw = parseCSV(await (await fetch(CSV_URL, {cache:"no-store"})).text());
+  const raw = parseCSV(await (await fetch(CSV_URL,{cache:"no-store"})).text());
 
   let tx = raw.map(r => ({
-    id: Number(r.id),
-    tanggal: r.tanggal,
-    uraian: r.uraian,
-    jenis: r.jenis,
-    nominal: Number(r.nominal),
-    bulan: Number(r.bulan),
-    tahun: Number(r.tahun)
+    id:Number(r.id),
+    tanggal:r.tanggal,
+    uraian:r.uraian,
+    jenis:r.jenis,
+    nominal:Number(r.nominal),
+    bulan:Number(r.bulan),
+    tahun:Number(r.tahun)
   })).filter(t => t.bulan == month);
 
-  const rawPrev = parseCSV(await (await fetch(CSV_URL, {cache:"no-store"})).text());
-  let prev = rawPrev.filter(r => Number(r.bulan) == (month - 1));
+  const rawPrev = parseCSV(await (await fetch(CSV_URL,{cache:"no-store"})).text());
+  let prev = rawPrev.filter(r=> Number(r.bulan)==(month-1));
 
-  let saldoAwal = 0;
+  let saldoAwal=0;
   prev.forEach(p=>{
-    if(p.jenis=="Penerimaan") saldoAwal += Number(p.nominal);
-    if(p.jenis=="Pengeluaran") saldoAwal -= Number(p.nominal);
+    if(p.jenis=="Penerimaan") saldoAwal+=Number(p.nominal);
+    if(p.jenis=="Pengeluaran") saldoAwal-=Number(p.nominal);
   });
 
-  let totalIn = 0, totalOut = 0;
+  let totalIn=0,totalOut=0;
   let saldo = saldoAwal;
 
+  /* ===== HEADER LAPORAN ===== */
   let html = `
     <div style="text-align:center;">
-        <img src="${cfg.header_url}" style="max-width:600px;width:100%;">
+      <img src="${cfg.header_url}" style="max-width:600px;width:100%;">
     </div>
 
     <h2 style="text-align:center;margin:5px 0;">
-        Buku Kas Umum<br>${cfg.subyek}
+      Buku Kas Umum<br>${cfg.subyek}
     </h2>
 
     <br>
@@ -294,11 +314,13 @@ async function loadAndRender(month){
           <th class="right">Penerimaan</th>
           <th class="right">Pengeluaran</th>
           <th class="right">Saldo</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody>
   `;
 
+  /* ===== SALDO AWAL ===== */
   html += `
     <tr style="font-weight:bold;background:#f6f7f9;">
       <td>1</td>
@@ -307,9 +329,14 @@ async function loadAndRender(month){
       <td></td>
       <td></td>
       <td class="right">${saldo.toLocaleString()}</td>
+      <td></td>
     </tr>
   `;
 
+  /* ===== SIMPAN TRANSAKSI UNTUK CRUD ===== */
+  window.currentTransactions = tx;
+
+  /* ===== TRANSAKSI ===== */
   tx.forEach((t,i)=>{
     let masuk = t.jenis=="Penerimaan"? t.nominal : 0;
     let keluar = t.jenis=="Pengeluaran"? t.nominal : 0;
@@ -326,10 +353,16 @@ async function loadAndRender(month){
         <td class="right">${masuk? masuk.toLocaleString():""}</td>
         <td class="right">${keluar? keluar.toLocaleString():""}</td>
         <td class="right">${saldo.toLocaleString()}</td>
+        <td>
+          <button onclick="editTransaksi(${t.id})" style="padding:5px 10px;border-radius:6px;margin-right:4px;">Edit</button>
+          <button onclick="hapusTransaksi(${t.id})" style="padding:5px 10px;border-radius:6px;background:#c0392b;color:white;border:none;">Hapus</button>
+        </td>
       </tr>
     `;
   });
 
+
+  /* ===== FOOTER ===== */
   html += `
       </tbody>
       <tfoot>
@@ -338,6 +371,7 @@ async function loadAndRender(month){
           <td class="right">${totalIn.toLocaleString()}</td>
           <td class="right">${totalOut.toLocaleString()}</td>
           <td class="right">${saldo.toLocaleString()}</td>
+          <td></td>
         </tr>
       </tfoot>
     </table>
@@ -366,45 +400,12 @@ async function loadAndRender(month){
   document.getElementById("laporan").innerHTML = html;
   document.getElementById("loadingLaporan").style.display = "none";
 }
-// kita simpan transaksi terakhir yg dimuat supaya bisa dipakai edit
-window.currentTransactions = [];
-
-// 1) Modifikasi loadAndRender supaya menyimpan transaksi & tambahkan kolom Aksi
-// (Jika Anda sudah punya loadAndRender, cukup tambahkan `window.currentTransactions = tx;`
-//  dan tambahkan cell tombol aksi pada rendering baris.)
-//
-// Contoh: setelah tx dibuat di loadAndRender, tambahkan:
-window.currentTransactions = tx;
-
-// Saat membuat baris transaksi di loadAndRender, tambahkan tombol aksi, ganti bagian html row
-// sebelumnya dengan menambahkan satu <td> untuk Aksi. Contoh adaptasi:
-// ...
-// html += `
-//   <tr>
-//     <td>${i+2}</td>
-//     <td>${t.tanggal}</td>
-//     <td>${t.uraian}</td>
-//     <td class="right">${masuk? masuk.toLocaleString():""}</td>
-//     <td class="right">${keluar? keluar.toLocaleString():""}</td>
-//     <td class="right">${saldo.toLocaleString()}</td>
-//     <td>
-//       <button onclick="editTransaksi(${t.id})" style="margin-right:6px;">Edit</button>
-//       <button onclick="hapusTransaksi(${t.id})" style="background:#d9534f;color:white;border:none;padding:6px 8px;border-radius:6px;">Hapus</button>
-//     </td>
-//   </tr>
-// `;
-// ...
-//
-// Jika Anda ingin saya gabungkan persis ke loadAndRender Anda, bilang — tapi seharusnya mudah tambahkan td aksi.
 
 
-// 2) fungsi buka modal & isi data
+/* ======================= EDIT ======================= */
 function editTransaksi(id){
-  const t = window.currentTransactions.find(x => Number(x.id) === Number(id));
-  if(!t) {
-    alert("Transaksi tidak ditemukan.");
-    return;
-  }
+  const t = window.currentTransactions.find(x=> Number(x.id)==Number(id));
+  if(!t){ alert("Data tidak ditemukan"); return; }
 
   document.getElementById("edit_id").value = t.id;
   document.getElementById("edit_tanggal").value = t.tanggal;
@@ -412,137 +413,84 @@ function editTransaksi(id){
   document.getElementById("edit_jenis").value = t.jenis;
   document.getElementById("edit_nominal").value = t.nominal;
 
-  // tampilkan modal
-  const mb = document.getElementById("modalEditBackdrop");
-  mb.style.display = "flex";
-  mb.setAttribute("aria-hidden","false");
+  document.getElementById("modalEditBackdrop").style.display = "flex";
 }
 
 function closeEditModal(){
-  const mb = document.getElementById("modalEditBackdrop");
-  mb.style.display = "none";
-  mb.setAttribute("aria-hidden","true");
+  document.getElementById("modalEditBackdrop").style.display = "none";
 }
 
-// 3) updateData() - kirim POST action=update
 async function updateData(){
   const id = document.getElementById("edit_id").value;
-  const tanggal = document.getElementById("edit_tanggal").value;
-  const uraian = document.getElementById("edit_uraian").value;
-  const jenis = document.getElementById("edit_jenis").value;
-  const nominal = document.getElementById("edit_nominal").value;
-
-  if(!tanggal || !uraian || !jenis) {
-    alert("Lengkapi tanggal, uraian, dan jenis.");
-    return;
-  }
-
-  // tampilkan loading kecil
-  document.getElementById("loading").style.display = "block";
-
   const fd = new FormData();
+
   fd.append("action","update");
   fd.append("id", id);
-  fd.append("tanggal", tanggal);
-  fd.append("uraian", uraian);
-  fd.append("jenis", jenis);
-  fd.append("nominal", nominal);
+  fd.append("tanggal", document.getElementById("edit_tanggal").value);
+  fd.append("uraian", document.getElementById("edit_uraian").value);
+  fd.append("jenis", document.getElementById("edit_jenis").value);
+  fd.append("nominal", document.getElementById("edit_nominal").value);
 
-  try{
-    const res = await fetch(APP_POST_URL, { method: "POST", body: fd });
-    const jsonRes = await res.json();
+  const res = await fetch(APP_POST_URL,{method:"POST",body:fd});
+  const js = await res.json();
 
-    document.getElementById("loading").style.display = "none";
-
-    if(jsonRes.status === "success"){
-      closeEditModal();
-      // refresh laporan untuk bulan yang sedang dipilih
-      const m = Number(document.getElementById("bulan").value);
-      await loadAndRender(m);
-      alert("Update berhasil.");
-    } else {
-      alert("Gagal update: " + jsonRes.message);
-    }
-  }catch(err){
-    document.getElementById("loading").style.display = "none";
-    alert("Terjadi error: " + err);
+  if(js.status=="success"){
+    closeEditModal();
+    const m = Number(document.getElementById("bulan").value);
+    await loadAndRender(m);
+    alert("Perubahan disimpan.");
+  } else {
+    alert("Gagal update: "+js.message);
   }
 }
 
-// 4) hapusTransaksi - konfirmasi + POST action=delete
-async function hapusTransaksi(id){
-  const alasan = prompt("Masukkan alasan penghapusan (misal: salah input):");
-  if (alasan === null) return; // cancel
-  if (alasan.trim() === "") {
-    if(!confirm("Alasan kosong. Lanjutkan hapus?")) return;
-  }
 
-  // tampilkan loading
-  document.getElementById("loading").style.display = "block";
+/* ======================= DELETE ======================= */
+async function hapusTransaksi(id){
+  let alasan = prompt("Alasan penghapusan?");
+  if(alasan === null) return;
 
   const fd = new FormData();
   fd.append("action","delete");
   fd.append("id", id);
-  fd.append("alasan", alasan); // saat ini AppsScript hard-delete; alasan akan diabaikan kecuali Anda simpan kolom
+  fd.append("alasan", alasan);
 
-  try{
-    const res = await fetch(APP_POST_URL, { method: "POST", body: fd });
-    const jsonRes = await res.json();
+  const res = await fetch(APP_POST_URL,{method:"POST",body:fd});
+  const js = await res.json();
 
-    document.getElementById("loading").style.display = "none";
-
-    if(jsonRes.status === "success"){
-      // reload laporan
-      const m = Number(document.getElementById("bulan").value);
-      await loadAndRender(m);
-      alert("Data berhasil dihapus.");
-    } else {
-      alert("Gagal menghapus: " + jsonRes.message);
-    }
-  }catch(err){
-    document.getElementById("loading").style.display = "none";
-    alert("Terjadi error: " + err);
+  if(js.status=="success"){
+    const m = Number(document.getElementById("bulan").value);
+    await loadAndRender(m);
+    alert("Transaksi dihapus.");
+  } else {
+    alert("Gagal hapus: "+js.message);
   }
 }
 
+
+/* ======================= DROPDOWN & TOMBOL ======================= */
 function initMonthDropdown(){
   const sel = document.getElementById("bulan");
   for(let i=1;i<=12;i++){
     const o=document.createElement("option");
-    o.value=i;
-    o.textContent=monthName(i);
+    o.value=i; o.textContent=monthName(i);
     sel.appendChild(o);
   }
 }
 initMonthDropdown();
 
-document.getElementById("lihat").addEventListener("click", async ()=>{
+document.getElementById("lihat").addEventListener("click", async()=>{
   const m = Number(document.getElementById("bulan").value);
-  document.getElementById("laporan").innerHTML = "";
-  document.getElementById("loadingLaporan").style.display = "block";
+  document.getElementById("laporan").innerHTML="";
+  document.getElementById("loadingLaporan").style.display="block";
   await loadAndRender(m);
 });
 </script>
-<!-- Modal Edit (taruh sebelum </body>) -->
-<style>
-  /* sederhana modal */
-  .modal-backdrop {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    display: none; align-items: center; justify-content: center; z-index: 9999;
-  }
-  .modal-card {
-    background: white; padding: 18px; border-radius: 8px; width: 95%; max-width: 420px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-  }
-  .modal-card label { font-weight:600; margin-top:8px; display:block; }
-  .modal-card input, .modal-card select { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #ccc;}
-  .modal-actions { margin-top:12px; display:flex; gap:8px; }
-  .btn-cancel { background:#ccc; color:#111; padding:8px 10px; border-radius:6px; cursor:pointer; border:none; flex:1; }
-  .btn-save { background:#0b74de; color:white; padding:8px 10px; border-radius:6px; cursor:pointer; border:none; flex:1; }
-</style>
 
-<div id="modalEditBackdrop" class="modal-backdrop" aria-hidden="true">
-  <div class="modal-card" role="dialog" aria-modal="true">
+
+<!-- ======================= MODAL EDIT ======================= -->
+<div id="modalEditBackdrop" class="modal-backdrop">
+  <div class="modal-card">
     <h3>Edit Transaksi</h3>
 
     <input type="hidden" id="edit_id">
