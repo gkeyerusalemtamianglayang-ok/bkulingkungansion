@@ -2,100 +2,191 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Input & Laporan Kas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aplikasi Kas Gereja</title>
 
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;margin:20px}
-  h1{margin-bottom:10px}
-  h2{margin-top:28px}
-  label{font-weight:bold}
-  input,select{
-    padding:6px;margin:4px 0;width:100%;max-width:300px;
-    border:1px solid #ccc;border-radius:4px;
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f5f6fa;
   }
-  button{
-    padding:8px 14px;background:#0b74de;color:#fff;
-    border:none;border-radius:5px;cursor:pointer
+
+  header {
+    background: #0b74de;
+    padding: 18px;
+    color: white;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 600;
   }
-  button:hover{background:#0a5fc2}
-  table{width:100%;border-collapse:collapse;margin-top:20px}
-  th,td{border:1px solid #ddd;padding:8px}
-  th{background:#f0f0f0}
-  .right{text-align:right}
-  .btn{
-    padding:8px 14px;border-radius:6px;background:#0b74de;
-    color:#fff;text-decoration:none;margin-right:6px
+
+  .container {
+    max-width: 900px;
+    margin: auto;
+    padding: 18px;
   }
-  .msg{margin-top:10px;font-weight:bold}
+
+  .card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .card h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #0b74de;
+    margin-bottom: 12px;
+  }
+
+  label {
+    font-weight: 600;
+    margin-top: 12px;
+    display: block;
+  }
+
+  input, select {
+    padding: 10px;
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-top: 4px;
+    font-size: 15px;
+  }
+
+  button {
+    background: #0b74de;
+    color: white;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 8px;
+    margin-top: 14px;
+    cursor: pointer;
+    font-size: 15px;
+    width: 100%;
+  }
+
+  button:hover {
+    background: #095fb7;
+  }
+
+  /* Tombol kecil */
+  .btn-sm {
+    display: inline-block;
+    background: #0b74de;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+
+  /* Tabel responsif */
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+  }
+
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #e1e4ea;
+    text-align: left;
+  }
+
+  th {
+    background: #eaf2ff;
+    font-weight: 600;
+  }
+
+  .right {
+    text-align: right;
+  }
+
+  #msg {
+    margin-top: 8px;
+    font-weight: bold;
+    color: green;
+  }
 </style>
+
 </head>
 <body>
 
-<h1>Input Buku Kas</h1>
+<header>
+  Aplikasi Buku Kas Gereja
+</header>
 
-<!-- ========================= FORM INPUT ========================= -->
-<h2>Input Transaksi</h2>
-<form id="formKas">
-  <label>Tanggal</label>
-  <input type="date" name="tanggal" required>
+<div class="container">
 
-  <label>Uraian</label>
-  <input type="text" name="uraian" placeholder="Contoh: Persembahan Minggu" required>
+  <!-- ========================= FORM INPUT ========================= -->
+  <div class="card">
+    <h2>Input Transaksi</h2>
 
-  <label>Jenis</label>
-  <select name="jenis" required>
-    <option value="Penerimaan">Penerimaan</option>
-    <option value="Pengeluaran">Pengeluaran</option>
-  </select>
+    <form id="formKas">
+      <label>Tanggal</label>
+      <input type="date" name="tanggal" required>
 
-  <label>Nominal</label>
-  <input type="number" name="nominal" placeholder="Contoh: 500000" required>
+      <label>Uraian</label>
+      <input type="text" name="uraian" required>
 
-  <button type="submit">Simpan Transaksi</button>
-</form>
+      <label>Jenis</label>
+      <select name="jenis">
+        <option value="Penerimaan">Penerimaan</option>
+        <option value="Pengeluaran">Pengeluaran</option>
+      </select>
 
-<div id="msg" class="msg"></div>
+      <label>Nominal</label>
+      <input type="number" name="nominal" required>
 
-<hr>
+      <button type="submit">Simpan Transaksi</button>
+    </form>
 
-<!-- ========================= FILTER LAPORAN ========================= -->
-<h2>Laporan Bulanan</h2>
+    <div id="msg"></div>
+  </div>
 
-<label>Pilih Bulan</label>
-<select id="bulan"></select>
+  <!-- ========================= FILTER & LAPORAN ========================= -->
+  <div class="card">
+    <h2>Laporan Bulanan</h2>
 
-<button id="lihat">Tampilkan</button>
-<a href="#" class="btn" onclick="window.print()">Cetak / PDF</a>
+    <label>Pilih Bulan</label>
+    <select id="bulan"></select>
 
-<div id="laporan"></div>
+    <button id="lihat">Tampilkan Laporan</button>
+    <a href="#" class="btn-sm" onclick="window.print()">Cetak / PDF</a>
 
+    <div id="laporan"></div>
+  </div>
+
+</div>
 
 <script>
-// =================== CONFIG ======================
+// URL BACKEND / CSV
 const APP_POST_URL = "https://script.google.com/macros/s/AKfycbw54wej60UYkvjTXfb7WNCLG-2LQEjM4KINEJCT8IDIUtGPKvZnTR5k2aUrTWbHWbG2/exec";
-
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=0&single=true&output=csv";
 
-
-// =================== FORM INPUT (POST) ======================
-document.getElementById("formKas").addEventListener("submit", async (e)=>{
+// ------------------ SIMPAN DATA ------------------
+document.getElementById("formKas").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = new FormData(e.target);
 
-  const res = await fetch(APP_POST_URL, {
-    method: "POST",
-    body: form
-  });
-
+  const res = await fetch(APP_POST_URL, { method: "POST", body: form });
   const text = await res.text();
-  document.getElementById("msg").innerHTML = text;
 
+  document.getElementById("msg").innerHTML = text;
   e.target.reset();
 });
 
-
-// =================== CSV PARSER ======================
+// ------------------ CSV PARSER ------------------
 function parseCSV(text){
   const lines = text.trim().split(/\r?\n/);
   const header = lines[0].split(",");
@@ -104,4 +195,107 @@ function parseCSV(text){
   for(let i=1;i<lines.length;i++){
     if(!lines[i].trim()) continue;
     const cols = lines[i].split(",");
-    const obj = {
+    const obj = {};
+    header.forEach((h,idx)=> obj[h.trim()] = cols[idx]?.trim());
+    rows.push(obj);
+  }
+  return rows;
+}
+
+function monthName(n){
+  const m=["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","Nopember","Desember"];
+  return m[n];
+}
+
+
+// ------------------ RENDER LAPORAN ------------------
+async function loadAndRender(month){
+  const raw = parseCSV(await (await fetch(CSV_URL, {cache:"no-store"})).text());
+
+  let tx = raw.map(r => ({
+    id: Number(r.id),
+    tanggal: r.tanggal,
+    uraian: r.uraian,
+    jenis: r.jenis,
+    nominal: Number(r.nominal),
+    bulan: Number(r.bulan),
+    tahun: Number(r.tahun)
+  })).filter(t => t.bulan == month);
+
+  // SALDO AWAL
+  const rawPrev = parseCSV(await (await fetch(CSV_URL, {cache:"no-store"})).text());
+  let prev = rawPrev.filter(r => Number(r.bulan) == (month - 1));
+
+  let saldoAwal = 0;
+  prev.forEach(p=>{
+    if(p.jenis=="Penerimaan") saldoAwal += Number(p.nominal);
+    if(p.jenis=="Pengeluaran") saldoAwal -= Number(p.nominal);
+  });
+
+  let totalIn = 0, totalOut = 0;
+
+  let html = `<h3>Bulan: ${monthName(month)}</h3>`;
+  html += `<p><b>Saldo Awal:</b> ${saldoAwal.toLocaleString()}</p>`;
+
+  html += `<div class="table-wrapper"><table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Tanggal</th>
+        <th>Uraian</th>
+        <th class="right">Masuk</th>
+        <th class="right">Keluar</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  tx.forEach((t, i)=>{
+    let masuk = t.jenis=="Penerimaan" ? t.nominal : "";
+    let keluar = t.jenis=="Pengeluaran" ? t.nominal : "";
+
+    if(masuk) totalIn += masuk;
+    if(keluar) totalOut += keluar;
+
+    html += `<tr>
+      <td>${i+1}</td>
+      <td>${t.tanggal}</td>
+      <td>${t.uraian}</td>
+      <td class="right">${masuk? masuk.toLocaleString():""}</td>
+      <td class="right">${keluar? keluar.toLocaleString():""}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+
+  html += `
+    <p><b>Total Penerimaan:</b> ${totalIn.toLocaleString()}</p>
+    <p><b>Total Pengeluaran:</b> ${totalOut.toLocaleString()}</p>
+    <p><b>Saldo Akhir:</b> ${(saldoAwal + totalIn - totalOut).toLocaleString()}</p>
+  `;
+
+  document.getElementById("laporan").innerHTML = html;
+}
+
+
+// ------------------ DROPDOWN BULAN ------------------
+function initMonthDropdown(){
+  const sel = document.getElementById("bulan");
+  for(let i=1;i<=12;i++){
+    const o=document.createElement("option");
+    o.value=i;
+    o.textContent=monthName(i);
+    sel.appendChild(o);
+  }
+}
+initMonthDropdown();
+
+
+// ------------------ TOMBOL "TAMPILKAN" ------------------
+document.getElementById("lihat").addEventListener("click", ()=>{
+  const m = Number(document.getElementById("bulan").value);
+  loadAndRender(m);
+});
+</script>
+
+</body>
+</html>
