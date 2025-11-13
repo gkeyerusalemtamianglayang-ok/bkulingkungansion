@@ -74,7 +74,6 @@
     background: #095fb7;
   }
 
-  /* Tombol kecil */
   .btn-sm {
     display: inline-block;
     background: #0b74de;
@@ -86,7 +85,6 @@
     margin-top: 10px;
   }
 
-  /* Tabel responsif */
   .table-wrapper {
     overflow-x: auto;
   }
@@ -161,6 +159,9 @@
     <label>Pilih Bulan</label>
     <select id="bulan"></select>
 
+    <label>Tanggal Laporan</label>
+    <input type="date" id="tanggalLaporan">
+
     <button id="lihat">Tampilkan Laporan</button>
     <a href="#" class="btn-sm" onclick="window.print()">Cetak / PDF</a>
 
@@ -170,11 +171,13 @@
 </div>
 
 <script>
-// URL BACKEND / CSV
+// ================== KONFIGURASI URL ==================
 const APP_POST_URL = "https://script.google.com/macros/s/AKfycbw54wej60UYkvjTXfb7WNCLG-2LQEjM4KINEJCT8IDIUtGPKvZnTR5k2aUrTWbHWbG2/exec";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=0&single=true&output=csv";
+const CONFIG_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=747260588&single=true&output=csv";
 
-// ------------------ SIMPAN DATA ------------------
+
+// ================== SIMPAN TRANSAKSI ==================
 document.getElementById("formKas").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = new FormData(e.target);
@@ -186,7 +189,8 @@ document.getElementById("formKas").addEventListener("submit", async (e) => {
   e.target.reset();
 });
 
-// ------------------ CSV PARSER ------------------
+
+// ================== CSV PARSER ==================
 function parseCSV(text){
   const lines = text.trim().split(/\r?\n/);
   const header = lines[0].split(",");
@@ -208,8 +212,30 @@ function monthName(n){
 }
 
 
-// ------------------ RENDER LAPORAN ------------------
+// ================== LOAD CONFIG ==================
+async function loadConfig(){
+  const res = await fetch(CONFIG_URL, {cache:"no-store"});
+  const raw = parseCSV(await res.text());
+  
+  let cfg = {};
+  raw.forEach(r => { cfg[r.key] = r.value; });
+  return cfg;
+}
+
+
+
+// ================== LAPORAN BUKU KAS GKE ==================
 async function loadAndRender(month){
+
+  const cfg = await loadConfig();
+  const tanggalDipilih = document.getElementById("tanggalLaporan").value;
+
+  let tanggalFormatted = "";
+  if(tanggalDipilih){
+    let t = new Date(tanggalDipilih);
+    tanggalFormatted = t.toLocaleDateString("id-ID", { day:"numeric", month:"long", year:"numeric" });
+  }
+
   const raw = parseCSV(await (await fetch(CSV_URL, {cache:"no-store"})).text());
 
   let tx = raw.map(r => ({
@@ -233,51 +259,107 @@ async function loadAndRender(month){
   });
 
   let totalIn = 0, totalOut = 0;
+  let saldo = saldoAwal;
 
-  let html = `<h3>Bulan: ${monthName(month)}</h3>`;
-  html += `<p><b>Saldo Awal:</b> ${saldoAwal.toLocaleString()}</p>`;
+  // ================== HEADER LAPORAN ==================
+  let html = `
+    <div style="text-align:center;">
+        <img src="${cfg.header_url}" style="max-width:600px;width:100%;">
+    </div>
 
-  html += `<div class="table-wrapper"><table>
-    <thead>
+    <h2 style="text-align:center;margin:5px 0;">
+        Buku Kas Umum<br>${cfg.subyek}
+    </h2>
+
+    <div style="text-align:right;margin-top:10px;">
+        ${cfg.lokasi}, ${tanggalFormatted}
+    </div>
+
+    <br>
+
+    <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Tgl</th>
+          <th>Uraian</th>
+          <th class="right">Penerimaan</th>
+          <th class="right">Pengeluaran</th>
+          <th class="right">Saldo</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  // SALDO AWAL
+  html += `
+    <tr style="font-weight:bold;background:#f6f7f9;">
+      <td>1</td>
+      <td></td>
+      <td>Saldo Awal Bulan</td>
+      <td></td>
+      <td></td>
+      <td class="right">${saldo.toLocaleString()}</td>
+    </tr>
+  `;
+
+  // TRANSAKSI
+  tx.forEach((t,i)=>{
+    let masuk = t.jenis=="Penerimaan"? t.nominal : 0;
+    let keluar = t.jenis=="Pengeluaran"? t.nominal : 0;
+
+    saldo += masuk - keluar;
+    totalIn += masuk;
+    totalOut += keluar;
+
+    html += `
       <tr>
-        <th>#</th>
-        <th>Tanggal</th>
-        <th>Uraian</th>
-        <th class="right">Masuk</th>
-        <th class="right">Keluar</th>
+        <td>${i+2}</td>
+        <td>${t.tanggal}</td>
+        <td>${t.uraian}</td>
+        <td class="right">${masuk? masuk.toLocaleString():""}</td>
+        <td class="right">${keluar? keluar.toLocaleString():""}</td>
+        <td class="right">${saldo.toLocaleString()}</td>
       </tr>
-    </thead>
-    <tbody>`;
-
-  tx.forEach((t, i)=>{
-    let masuk = t.jenis=="Penerimaan" ? t.nominal : "";
-    let keluar = t.jenis=="Pengeluaran" ? t.nominal : "";
-
-    if(masuk) totalIn += masuk;
-    if(keluar) totalOut += keluar;
-
-    html += `<tr>
-      <td>${i+1}</td>
-      <td>${t.tanggal}</td>
-      <td>${t.uraian}</td>
-      <td class="right">${masuk? masuk.toLocaleString():""}</td>
-      <td class="right">${keluar? keluar.toLocaleString():""}</td>
-    </tr>`;
+    `;
   });
 
-  html += `</tbody></table></div>`;
-
+  // FOOTER
   html += `
-    <p><b>Total Penerimaan:</b> ${totalIn.toLocaleString()}</p>
-    <p><b>Total Pengeluaran:</b> ${totalOut.toLocaleString()}</p>
-    <p><b>Saldo Akhir:</b> ${(saldoAwal + totalIn - totalOut).toLocaleString()}</p>
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:bold;background:#eaf2ff;">
+          <td colspan="3" class="right">Jumlah</td>
+          <td class="right">${totalIn.toLocaleString()}</td>
+          <td class="right">${totalOut.toLocaleString()}</td>
+          <td class="right">${saldo.toLocaleString()}</td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+
+    <br><br><br>
+
+    <table style="width:100%;margin-top:40px;">
+      <tr>
+        <td style="text-align:center;">
+            Ketua,<br><br><br>
+            <b>${cfg.ketua}</b>
+        </td>
+        <td style="text-align:center;">
+            Bendahara,<br><br><br>
+            <b>${cfg.bendahara}</b>
+        </td>
+      </tr>
+    </table>
   `;
 
   document.getElementById("laporan").innerHTML = html;
 }
 
 
-// ------------------ DROPDOWN BULAN ------------------
+// ================== DROPDOWN BULAN ==================
 function initMonthDropdown(){
   const sel = document.getElementById("bulan");
   for(let i=1;i<=12;i++){
@@ -290,7 +372,7 @@ function initMonthDropdown(){
 initMonthDropdown();
 
 
-// ------------------ TOMBOL "TAMPILKAN" ------------------
+// ================== TOMBOL TAMPIL ==================
 document.getElementById("lihat").addEventListener("click", ()=>{
   const m = Number(document.getElementById("bulan").value);
   loadAndRender(m);
