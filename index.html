@@ -115,15 +115,16 @@
     font-weight: bold;
     color: green;
   }
-  #loading b, #loadingLaporan b {
-  animation: blink 1s infinite;
-}
 
-@keyframes blink {
-  0% { opacity: 0.2; }
-  50% { opacity: 1; }
-  100% { opacity: 0.2; }
-}
+  /* Loading Animasi */
+  #loading b, #loadingLaporan b {
+    animation: blink 1s infinite;
+  }
+  @keyframes blink {
+    0% { opacity: 0.2; }
+    50% { opacity: 1; }
+    100% { opacity: 0.2; }
+  }
 
 </style>
 
@@ -159,15 +160,11 @@
       <button type="submit">Simpan Transaksi</button>
     </form>
 
-    <div id="msg"></div>
     <div id="loading" style="display:none; padding:10px; margin-top:10px; text-align:center;">
-  <b>Sedang memproses...</b>
-      <div id="loadingLaporan" style="display:none; padding:10px; margin-top:10px; text-align:center;">
-  <b>Memuat laporan...</b>
-</div>
+      <b>Sedang memproses...</b>
+    </div>
 
-</div>
-
+    <div id="msg"></div>
   </div>
 
   <!-- ========================= FILTER & LAPORAN ========================= -->
@@ -183,50 +180,44 @@
     <button id="lihat">Tampilkan Laporan</button>
     <a href="#" class="btn-sm" onclick="window.print()">Cetak / PDF</a>
 
-    <div id="loadingLaporan" style="display:none;">
-  <b>Memuat laporan...</b>
-</div>
+    <div id="loadingLaporan" style="display:none; padding:10px; text-align:center;">
+      <b>Memuat laporan...</b>
+    </div>
+
     <div id="laporan"></div>
   </div>
 
 </div>
 
 <script>
-// ================== KONFIGURASI URL ==================
 const APP_POST_URL = "https://script.google.com/macros/s/AKfycbw54wej60UYkvjTXfb7WNCLG-2LQEjM4KINEJCT8IDIUtGPKvZnTR5k2aUrTWbHWbG2/exec";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=0&single=true&output=csv";
 const CONFIG_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6SHdMmw12HIgkj1VrsZRSjHrQPzlDMceBg4zOGYp5V6GimreVYVt71pgKVWC1fmA428NkQYfs5Jaw/pub?gid=747260588&single=true&output=csv";
 
-
-// ================== SIMPAN TRANSAKSI ==================
 document.getElementById("formKas").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = new FormData(e.target);
 
   document.getElementById("loading").style.display = "block";
-document.getElementById("msg").innerHTML = "";
+  document.getElementById("msg").innerHTML = "";
 
-const res = await fetch(APP_POST_URL, { method: "POST", body: form });
-const text = await res.text();
+  const res = await fetch(APP_POST_URL, { method: "POST", body: form });
+  const text = await res.text();
 
-document.getElementById("loading").style.display = "none";
-document.getElementById("msg").innerHTML = text;
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("msg").innerHTML = text;
 
-e.target.reset();
+  e.target.reset();
 });
 
-
-// ================== CSV PARSER ==================
 function parseCSV(text){
   const lines = text.trim().split(/\r?\n/);
   const header = lines[0].split(",");
   const rows = [];
-
   for(let i=1;i<lines.length;i++){
-    if(!lines[i].trim()) continue;
-    const cols = lines[i].split(",");
-    const obj = {};
-    header.forEach((h,idx)=> obj[h.trim()] = cols[idx]?.trim());
+    let cols = lines[i].split(",");
+    let obj = {};
+    header.forEach((h,idx)=> obj[h.trim()] = cols[idx]?.trim() || "");
     rows.push(obj);
   }
   return rows;
@@ -237,21 +228,17 @@ function monthName(n){
   return m[n];
 }
 
-
-// ================== LOAD CONFIG ==================
 async function loadConfig(){
   const res = await fetch(CONFIG_URL, {cache:"no-store"});
   const raw = parseCSV(await res.text());
-  
   let cfg = {};
   raw.forEach(r => { cfg[r.key] = r.value; });
   return cfg;
 }
 
-
-
-// ================== LAPORAN BUKU KAS GKE ==================
 async function loadAndRender(month){
+
+  document.getElementById("loadingLaporan").style.display = "block";
 
   const cfg = await loadConfig();
   const tanggalDipilih = document.getElementById("tanggalLaporan").value;
@@ -274,7 +261,6 @@ async function loadAndRender(month){
     tahun: Number(r.tahun)
   })).filter(t => t.bulan == month);
 
-  // SALDO AWAL
   const rawPrev = parseCSV(await (await fetch(CSV_URL, {cache:"no-store"})).text());
   let prev = rawPrev.filter(r => Number(r.bulan) == (month - 1));
 
@@ -287,7 +273,6 @@ async function loadAndRender(month){
   let totalIn = 0, totalOut = 0;
   let saldo = saldoAwal;
 
-  // ================== HEADER LAPORAN ==================
   let html = `
     <div style="text-align:center;">
         <img src="${cfg.header_url}" style="max-width:600px;width:100%;">
@@ -296,10 +281,6 @@ async function loadAndRender(month){
     <h2 style="text-align:center;margin:5px 0;">
         Buku Kas Umum<br>${cfg.subyek}
     </h2>
-
-    <div style="text-align:right;margin-top:10px;">
-        ${cfg.lokasi}, ${tanggalFormatted}
-    </div>
 
     <br>
 
@@ -318,7 +299,6 @@ async function loadAndRender(month){
       <tbody>
   `;
 
-  // SALDO AWAL
   html += `
     <tr style="font-weight:bold;background:#f6f7f9;">
       <td>1</td>
@@ -330,7 +310,6 @@ async function loadAndRender(month){
     </tr>
   `;
 
-  // TRANSAKSI
   tx.forEach((t,i)=>{
     let masuk = t.jenis=="Penerimaan"? t.nominal : 0;
     let keluar = t.jenis=="Pengeluaran"? t.nominal : 0;
@@ -351,7 +330,6 @@ async function loadAndRender(month){
     `;
   });
 
-  // FOOTER
   html += `
       </tbody>
       <tfoot>
@@ -367,7 +345,11 @@ async function loadAndRender(month){
 
     <br><br><br>
 
-    <table style="width:100%;margin-top:40px;">
+    <div style="text-align:right;margin-bottom:40px;">
+        ${cfg.lokasi}, ${tanggalFormatted}
+    </div>
+
+    <table style="width:100%;">
       <tr>
         <td style="text-align:center;">
             Ketua,<br><br><br>
@@ -382,10 +364,9 @@ async function loadAndRender(month){
   `;
 
   document.getElementById("laporan").innerHTML = html;
+  document.getElementById("loadingLaporan").style.display = "none";
 }
 
-
-// ================== DROPDOWN BULAN ==================
 function initMonthDropdown(){
   const sel = document.getElementById("bulan");
   for(let i=1;i<=12;i++){
@@ -397,17 +378,11 @@ function initMonthDropdown(){
 }
 initMonthDropdown();
 
-
-// ================== TOMBOL TAMPIL ==================
 document.getElementById("lihat").addEventListener("click", async ()=>{
   const m = Number(document.getElementById("bulan").value);
-
-  document.getElementById("loadingLaporan").style.display = "block";
   document.getElementById("laporan").innerHTML = "";
-
+  document.getElementById("loadingLaporan").style.display = "block";
   await loadAndRender(m);
-
-  document.getElementById("loadingLaporan").style.display = "none";
 });
 </script>
 
