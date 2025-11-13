@@ -130,9 +130,19 @@ th { background:#eef6ff; font-weight:600; }
       </div>
 
       <div class="filter-item">
-        <label>Pilih Tahun</label>
-        <select id="tahun"></select>
-      </div>
+  <label>Dari Bulan</label>
+  <select id="dariBulan"></select>
+</div>
+
+<div class="filter-item">
+  <label>Sampai Bulan</label>
+  <select id="sampaiBulan"></select>
+</div>
+
+<div class="filter-item filter-btn">
+  <button id="lihatRentang">Laporan Rentang Bulan</button>
+</div>
+
 
       <div class="filter-item">
         <label>Tanggal Laporan (untuk cetak)</label>
@@ -419,6 +429,87 @@ async function loadAndRender(month, year){
     document.getElementById('loadingLaporan').style.display = 'none';
   }
 }
+async function loadRentang(dari, sampai, year){
+  document.getElementById('loadingLaporan').style.display = 'block';
+
+  const cfg = await loadConfig();
+  const semua = await loadAllTransactions();
+
+  // Filter data sesuai tahun & rentang bulan
+  let tx = semua.filter(r =>
+    Number(r.tahun) === Number(year) &&
+    Number(r.bulan) >= Number(dari) &&
+    Number(r.bulan) <= Number(sampai)
+  );
+
+  // Sort tanggal
+  tx.sort((a,b)=> new Date(a.tanggal) - new Date(b.tanggal));
+
+  // SALDO AWAL = bulan sebelum "dari"
+  const saldoAwal = hitungSaldoAwalSemua(semua, dari, year);
+
+  let saldo = saldoAwal;
+  let totalIn = 0, totalOut = 0;
+
+  let html = "";
+
+  if(cfg.header_url)
+    html += `<div style="text-align:center;margin-bottom:6px;"><img src="${cfg.header_url}"
+              style="max-width:720px;width:100%;height:auto;"></div>`;
+
+  html += `<h2 style="text-align:center;margin:6px 0;">Buku Kas Umum<br>${cfg.subyek}</h2>`;
+  html += `<div style="text-align:center;font-weight:600;margin-bottom:8px;">
+             Laporan Rentang Bulan: ${monthName(dari)} – ${monthName(sampai)} ${year}
+           </div>`;
+
+  html += `<div class="table-wrapper"><table><thead><tr>
+    <th>No</th><th>Tanggal</th><th>Uraian</th>
+    <th class="right">Penerimaan</th>
+    <th class="right">Pengeluaran</th>
+    <th class="right">Saldo</th>
+    <th class="no-print">Aksi</th>
+  </tr></thead><tbody>`;
+
+  html += `<tr style="font-weight:700;background:#f6f7f9;">
+    <td>1</td><td></td><td>Saldo Awal</td><td></td><td></td>
+    <td class="right">${saldo.toLocaleString()}</td><td class="no-print"></td>
+  </tr>`;
+
+  let no = 2;
+
+  tx.forEach(t=>{
+    const masuk  = t.jenis === "Penerimaan" ? t.nominal : 0;
+    const keluar = t.jenis === "Pengeluaran" ? t.nominal : 0;
+
+    saldo += masuk - keluar;
+    totalIn += masuk;
+    totalOut += keluar;
+
+    html += `<tr>
+      <td>${no++}</td>
+      <td>${t.tanggal}</td>
+      <td>${escapeHtml(t.uraian)}</td>
+      <td class="right">${masuk? masuk.toLocaleString() : ""}</td>
+      <td class="right">${keluar? keluar.toLocaleString() : ""}</td>
+      <td class="right">${saldo.toLocaleString()}</td>
+      <td class="no-print">
+        <button class="btn-edit" onclick="editTransaksi('${t.id}')">Edit</button>
+        <button class="btn-danger" onclick="hapusTransaksi('${t.id}')">Hapus</button>
+      </td>
+    </tr>`;
+  });
+
+  html += `</tbody><tfoot><tr style="font-weight:700;background:#eaf2ff;">
+    <td colspan="3" class="right">Jumlah</td>
+    <td class="right">${totalIn.toLocaleString()}</td>
+    <td class="right">${totalOut.toLocaleString()}</td>
+    <td class="right">${saldo.toLocaleString()}</td>
+    <td class="no-print"></td>
+  </tr></tfoot></table></div>`;
+
+  document.getElementById('laporan').innerHTML = html;
+  document.getElementById('loadingLaporan').style.display = 'none';
+}
 
 /* ========== CRUD ========== */
 function editTransaksi(id){
@@ -477,6 +568,27 @@ function initMonthDropdown(){
   for(let i=1;i<=12;i++){ const o=document.createElement('option'); o.value=i; o.textContent=monthName(i); sel.appendChild(o); }
   sel.value = new Date().getMonth()+1;
 }
+  function initRentangDropdown(){
+  const db = document.getElementById('dariBulan');
+  const sb = document.getElementById('sampaiBulan');
+  if(!db || !sb) return;
+
+  db.innerHTML = "";
+  sb.innerHTML = "";
+
+  for(let i=1;i<=12;i++){
+    const o1 = document.createElement('option');
+    const o2 = document.createElement('option');
+    o1.value = o2.value = i;
+    o1.textContent = o2.textContent = monthName(i);
+    db.appendChild(o1);
+    sb.appendChild(o2);
+  }
+
+  db.value = 1;
+  sb.value = new Date().getMonth()+1;
+}
+
 function initYearDropdown(){
   const sel = document.getElementById('tahun'); sel.innerHTML = '';
   const thisYear = new Date().getFullYear();
@@ -509,6 +621,21 @@ document.getElementById('lihat').addEventListener('click', async function(){
   document.getElementById('loadingLaporan').style.display = 'block';
   await loadAndRender(m,y);
 });
+document.getElementById('lihatRentang').addEventListener('click', async ()=>{
+  const dari = Number(document.getElementById('dariBulan').value);
+  const sampai = Number(document.getElementById('sampaiBulan').value);
+  const year = Number(document.getElementById('tahun').value);
+
+  if(sampai < dari){
+    alert("Bulan akhir harus lebih besar atau sama dengan bulan awal.");
+    return;
+  }
+
+  document.getElementById('laporan').innerHTML = '';
+  document.getElementById('loadingLaporan').style.display = 'block';
+
+  await loadRentang(dari, sampai, year);
+});
 
 /* Download PDF (uses clone so UI buttons removed) */
 document.getElementById('downloadPDF').addEventListener('click', function(){
@@ -528,6 +655,7 @@ document.getElementById('downloadPDF').addEventListener('click', function(){
 /* Boot */
 initMonthDropdown();
 initYearDropdown();
+initRentangDropdown(); // <-- tambahan
 applyHeaderConfig();
 (async ()=>{
   const m = Number(document.getElementById('bulan').value);
