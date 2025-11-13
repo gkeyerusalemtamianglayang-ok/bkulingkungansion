@@ -229,16 +229,54 @@ document.getElementById("formKas").addEventListener("submit", async (e) => {
 
 /* ======================= CSV PARSER ======================= */
 function parseCSV(text){
-  const lines = text.trim().split(/\r?\n/);
-  const header = lines[0].split(",");
   const rows = [];
-  for(let i=1;i<lines.length;i++){
-    let cols = lines[i].split(",");
-    let obj = {};
-    header.forEach((h,idx)=> obj[h.trim()] = cols[idx]?.trim() || "");
-    rows.push(obj);
+  let lines = text.split(/\r?\n/);
+
+  let insideQuotes = false;
+  let field = "";
+  let row = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    let chars = [...lines[i]];
+
+    for (let j = 0; j < chars.length; j++) {
+      let c = chars[j];
+
+      if (c === '"') {
+        // Toggle state kutip
+        insideQuotes = !insideQuotes;
+        continue;
+      }
+
+      // Jika koma DAN tidak sedang di dalam kutip → akhiri field
+      if (c === ',' && !insideQuotes) {
+        row.push(field);
+        field = "";
+      } else {
+        field += c;
+      }
+    }
+
+    // Akhiri row
+    row.push(field);
+    field = "";
+
+    // Jika baris selesai dan tidak dalam kutip → push row
+    if (!insideQuotes) {
+      rows.push(row);
+      row = [];
+    }
   }
-  return rows;
+
+  // Ambil header
+  const headers = rows.shift().map(h => h.trim());
+
+  // Buat list object
+  return rows.map(r => {
+    let obj = {};
+    headers.forEach((h,i)=> obj[h] = (r[i] || "").trim());
+    return obj;
+  });
 }
 
 function monthName(n){
