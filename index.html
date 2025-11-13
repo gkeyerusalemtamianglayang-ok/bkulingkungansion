@@ -38,6 +38,74 @@ th { background:#eef6ff; font-weight:600; }
 /* ---------- Modal ---------- */
 .modal-backdrop { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.35); z-index:9999; }
 .modal-card { background:white; width:95%; max-width:480px; padding:16px; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.15); }
+/* ========================= LAPORAN FILTER BAR ========================= */
+
+.laporan-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  border: 1px solid #dce6ff;
+}
+
+.filter-item {
+  flex: 1;
+  min-width: 180px;
+}
+
+.filter-item label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.filter-item select,
+.filter-item input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  font-size: 15px;
+}
+
+/* Tombol Rapi */
+.filter-btn button,
+.btn-print {
+  width: 100%;
+  padding: 12px;
+  background: #0b74de;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  margin-top: 6px;
+}
+
+.btn-print {
+  background: #0077ff;
+}
+
+.filter-btn button:hover,
+.btn-print:hover {
+  background: #085ab4;
+}
+
+/* ========================= CETAK TANPA HEADER/FOOTER BROWSER ========================= */
+@page {
+  margin: 10mm !important;
+}
+
+/* Hilangkan header/footer default Chrome saat print */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
 
 /* ---------- Print / A4 ---------- */
 @media print {
@@ -68,6 +136,44 @@ th { background:#eef6ff; font-weight:600; }
   .app-header .title { font-size:18px; }
   .header-img { max-width:320px; }
 }
+  /* ---------- INPUT TRANSAKSI LEBIH RAPI ---------- */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+/* Tombol simpan responsif & proporsional */
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 6px;
+  background:#0b74de;
+  color:white;
+  border:none;
+  cursor:pointer;
+  margin-top: 4px;
+}
+
+.btn-submit:hover {
+  background:#095fb7;
+}
+
 </style>
 </head>
 
@@ -81,65 +187,82 @@ th { background:#eef6ff; font-weight:600; }
 </div>
 
 <div class="container">
-  <!-- ========================= FORM INPUT ========================= -->
-  <div class="card">
-    <h3>Input Transaksi</h3>
-    <form id="formKas">
+  <!-- ========================= FORM INPUT (FINAL) ========================= -->
+<div class="card">
+  <h3>Input Transaksi</h3>
+
+  <form id="formKas">
+
+    <div class="form-group">
       <label>Tanggal</label>
       <input type="date" name="tanggal" required>
+    </div>
 
+    <div class="form-group">
       <label>Uraian</label>
-      <input type="text" name="uraian" required>
+      <input type="text" name="uraian" placeholder="Contoh: Persembahan Minggu" required>
+    </div>
 
+    <div class="form-group">
       <label>Jenis</label>
       <select name="jenis">
         <option value="Penerimaan">Penerimaan</option>
         <option value="Pengeluaran">Pengeluaran</option>
       </select>
+    </div>
 
+    <div class="form-group">
       <label>Nominal</label>
       <input type="text" name="nominal" placeholder="Masukkan angka tanpa titik" required>
+    </div>
 
-      <button type="submit">Simpan Transaksi</button>
-    </form>
+    <button type="submit" class="btn-submit">Simpan Transaksi</button>
+  </form>
 
-    <div id="loading" class="small"><b>Sedang memproses...</b></div>
-    <div id="msg" class="small"></div>
-  </div>
+  <div id="loading" class="small"><b>Sedang memproses...</b></div>
+  <div id="msg" class="small"></div>
+</div>
 
 
-  <!-- ========================= FILTER & LAPORAN ========================= -->
-  <div class="card">
-    <h3>Laporan Bulanan</h3>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <div style="flex:1; min-width:150px;">
+  <!-- ========================= FILTER & LAPORAN (FINAL) ========================= -->
+<div class="card">
+
+  <h3 style="margin-bottom:16px;">Laporan Bulanan</h3>
+
+  <!-- FILTER BAR -->
+  <div class="laporan-filter">
+
+      <div class="filter-item">
         <label>Pilih Bulan</label>
         <select id="bulan"></select>
       </div>
 
-      <div style="width:150px;">
+      <div class="filter-item">
         <label>Pilih Tahun</label>
         <select id="tahun"></select>
       </div>
 
-      <div style="width:220px;">
+      <div class="filter-item">
         <label>Tanggal Laporan (untuk cetak)</label>
         <input type="date" id="tanggalLaporan">
       </div>
 
-      <div style="min-width:140px; align-self:end;">
+      <div class="filter-item filter-btn">
         <button id="lihat">Tampilkan Laporan</button>
       </div>
 
-      <div style="min-width:140px; align-self:end;">
-        <a class="btn-sm" id="cetakBtn" href="#" onclick="window.print()">Cetak / PDF</a>
+      <div class="filter-item filter-btn">
+        <button id="cetakBtn" class="btn-print" onclick="window.print()">Cetak / PDF</button>
       </div>
-    </div>
 
-    <div id="loadingLaporan" class="small"><b>Memuat laporan...</b></div>
-    <div id="laporan" style="margin-top:12px;"></div>
   </div>
+
+  <div id="loadingLaporan" class="small"><b>Memuat laporan...</b></div>
+  <div id="laporan" style="margin-top:24px;"></div>
+
+</div>
+
 
 </div> <!-- END OF CONTAINER -->
 
