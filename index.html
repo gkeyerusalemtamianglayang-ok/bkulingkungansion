@@ -366,6 +366,144 @@ async function loadAndRender(month){
   document.getElementById("laporan").innerHTML = html;
   document.getElementById("loadingLaporan").style.display = "none";
 }
+// kita simpan transaksi terakhir yg dimuat supaya bisa dipakai edit
+window.currentTransactions = [];
+
+// 1) Modifikasi loadAndRender supaya menyimpan transaksi & tambahkan kolom Aksi
+// (Jika Anda sudah punya loadAndRender, cukup tambahkan `window.currentTransactions = tx;`
+//  dan tambahkan cell tombol aksi pada rendering baris.)
+//
+// Contoh: setelah tx dibuat di loadAndRender, tambahkan:
+window.currentTransactions = tx;
+
+// Saat membuat baris transaksi di loadAndRender, tambahkan tombol aksi, ganti bagian html row
+// sebelumnya dengan menambahkan satu <td> untuk Aksi. Contoh adaptasi:
+// ...
+// html += `
+//   <tr>
+//     <td>${i+2}</td>
+//     <td>${t.tanggal}</td>
+//     <td>${t.uraian}</td>
+//     <td class="right">${masuk? masuk.toLocaleString():""}</td>
+//     <td class="right">${keluar? keluar.toLocaleString():""}</td>
+//     <td class="right">${saldo.toLocaleString()}</td>
+//     <td>
+//       <button onclick="editTransaksi(${t.id})" style="margin-right:6px;">Edit</button>
+//       <button onclick="hapusTransaksi(${t.id})" style="background:#d9534f;color:white;border:none;padding:6px 8px;border-radius:6px;">Hapus</button>
+//     </td>
+//   </tr>
+// `;
+// ...
+//
+// Jika Anda ingin saya gabungkan persis ke loadAndRender Anda, bilang — tapi seharusnya mudah tambahkan td aksi.
+
+
+// 2) fungsi buka modal & isi data
+function editTransaksi(id){
+  const t = window.currentTransactions.find(x => Number(x.id) === Number(id));
+  if(!t) {
+    alert("Transaksi tidak ditemukan.");
+    return;
+  }
+
+  document.getElementById("edit_id").value = t.id;
+  document.getElementById("edit_tanggal").value = t.tanggal;
+  document.getElementById("edit_uraian").value = t.uraian;
+  document.getElementById("edit_jenis").value = t.jenis;
+  document.getElementById("edit_nominal").value = t.nominal;
+
+  // tampilkan modal
+  const mb = document.getElementById("modalEditBackdrop");
+  mb.style.display = "flex";
+  mb.setAttribute("aria-hidden","false");
+}
+
+function closeEditModal(){
+  const mb = document.getElementById("modalEditBackdrop");
+  mb.style.display = "none";
+  mb.setAttribute("aria-hidden","true");
+}
+
+// 3) updateData() - kirim POST action=update
+async function updateData(){
+  const id = document.getElementById("edit_id").value;
+  const tanggal = document.getElementById("edit_tanggal").value;
+  const uraian = document.getElementById("edit_uraian").value;
+  const jenis = document.getElementById("edit_jenis").value;
+  const nominal = document.getElementById("edit_nominal").value;
+
+  if(!tanggal || !uraian || !jenis) {
+    alert("Lengkapi tanggal, uraian, dan jenis.");
+    return;
+  }
+
+  // tampilkan loading kecil
+  document.getElementById("loading").style.display = "block";
+
+  const fd = new FormData();
+  fd.append("action","update");
+  fd.append("id", id);
+  fd.append("tanggal", tanggal);
+  fd.append("uraian", uraian);
+  fd.append("jenis", jenis);
+  fd.append("nominal", nominal);
+
+  try{
+    const res = await fetch(APP_POST_URL, { method: "POST", body: fd });
+    const jsonRes = await res.json();
+
+    document.getElementById("loading").style.display = "none";
+
+    if(jsonRes.status === "success"){
+      closeEditModal();
+      // refresh laporan untuk bulan yang sedang dipilih
+      const m = Number(document.getElementById("bulan").value);
+      await loadAndRender(m);
+      alert("Update berhasil.");
+    } else {
+      alert("Gagal update: " + jsonRes.message);
+    }
+  }catch(err){
+    document.getElementById("loading").style.display = "none";
+    alert("Terjadi error: " + err);
+  }
+}
+
+// 4) hapusTransaksi - konfirmasi + POST action=delete
+async function hapusTransaksi(id){
+  const alasan = prompt("Masukkan alasan penghapusan (misal: salah input):");
+  if (alasan === null) return; // cancel
+  if (alasan.trim() === "") {
+    if(!confirm("Alasan kosong. Lanjutkan hapus?")) return;
+  }
+
+  // tampilkan loading
+  document.getElementById("loading").style.display = "block";
+
+  const fd = new FormData();
+  fd.append("action","delete");
+  fd.append("id", id);
+  fd.append("alasan", alasan); // saat ini AppsScript hard-delete; alasan akan diabaikan kecuali Anda simpan kolom
+
+  try{
+    const res = await fetch(APP_POST_URL, { method: "POST", body: fd });
+    const jsonRes = await res.json();
+
+    document.getElementById("loading").style.display = "none";
+
+    if(jsonRes.status === "success"){
+      // reload laporan
+      const m = Number(document.getElementById("bulan").value);
+      await loadAndRender(m);
+      alert("Data berhasil dihapus.");
+    } else {
+      alert("Gagal menghapus: " + jsonRes.message);
+    }
+  }catch(err){
+    document.getElementById("loading").style.display = "none";
+    alert("Terjadi error: " + err);
+  }
+}
 
 function initMonthDropdown(){
   const sel = document.getElementById("bulan");
@@ -385,6 +523,51 @@ document.getElementById("lihat").addEventListener("click", async ()=>{
   await loadAndRender(m);
 });
 </script>
+<!-- Modal Edit (taruh sebelum </body>) -->
+<style>
+  /* sederhana modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: none; align-items: center; justify-content: center; z-index: 9999;
+  }
+  .modal-card {
+    background: white; padding: 18px; border-radius: 8px; width: 95%; max-width: 420px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  }
+  .modal-card label { font-weight:600; margin-top:8px; display:block; }
+  .modal-card input, .modal-card select { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #ccc;}
+  .modal-actions { margin-top:12px; display:flex; gap:8px; }
+  .btn-cancel { background:#ccc; color:#111; padding:8px 10px; border-radius:6px; cursor:pointer; border:none; flex:1; }
+  .btn-save { background:#0b74de; color:white; padding:8px 10px; border-radius:6px; cursor:pointer; border:none; flex:1; }
+</style>
+
+<div id="modalEditBackdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <h3>Edit Transaksi</h3>
+
+    <input type="hidden" id="edit_id">
+
+    <label>Tanggal</label>
+    <input type="date" id="edit_tanggal">
+
+    <label>Uraian</label>
+    <input type="text" id="edit_uraian">
+
+    <label>Jenis</label>
+    <select id="edit_jenis">
+      <option value="Penerimaan">Penerimaan</option>
+      <option value="Pengeluaran">Pengeluaran</option>
+    </select>
+
+    <label>Nominal</label>
+    <input type="number" id="edit_nominal">
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEditModal()">Batal</button>
+      <button class="btn-save" onclick="updateData()">Simpan</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
